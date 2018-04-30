@@ -1,5 +1,5 @@
 ### Own ignore files
-tracker/*.json
+tracker/
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
