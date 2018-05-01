@@ -21,7 +21,9 @@ def get_recommendations(user_id):
     recommendations = recommender.get_recommendations(user_id, top_n=top) if top \
         else recommender.get_recommendations(user_id)
 
-    return jsonify({user_id: recommendations})
+    # json array packed in object so it is safe
+    # against redefining js Array constructor exploit
+    return jsonify({'data': recommendations})
 
 
 if __name__ == '__main__':
