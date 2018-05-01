@@ -1,7 +1,7 @@
 import json
 import os
 import itertools
-import pandas as pd
+import pandas
 
 from surprise import Dataset
 from surprise import Reader
@@ -21,36 +21,40 @@ INTERACTIONS_FILE_NAMES = ['observed-offers.json', 'reported-offers.json', 'view
 
 
 class Recommender(object):
-    DEFAULT_SCORE_MAP = {
+    __DEFAULT_SCORE_MAP = {
         'observed-offer': 5.0,
         'reported-offer': 2.0,
         'viewed-offer': 3.0
     }
-    DEFAULT_SCALE = (1, 5)
+    __DEFAULT_SCALE = (1, 5)
 
-    def __init__(self, score_map: dict = DEFAULT_SCORE_MAP, rating_scale: tuple = DEFAULT_SCALE, *file_paths):
+    def __init__(self, score_map: dict = __DEFAULT_SCORE_MAP, rating_scale: tuple = __DEFAULT_SCALE, *file_paths):
+        self.__offers_id_map: dict = None
+        self.__algorithm: SVD = None
+        self.__prediction: list = None
+        self.init(score_map, rating_scale, *file_paths)
+
+    def init(self, score_map: dict = __DEFAULT_SCORE_MAP, rating_scale: tuple = __DEFAULT_SCALE, *file_paths):
         if len(file_paths) == 0:
-            file_paths = (os.path.join(TRACKER_FILE_FOLDER, file_name) for file_name in INTERACTIONS_FILE_NAMES)
-
+            file_paths = [os.path.join(TRACKER_FILE_FOLDER, file_name) for file_name in INTERACTIONS_FILE_NAMES]
         all_interactions_list = list(itertools.chain.from_iterable(
             [json.load(open(file_path)) for file_path in file_paths]))
-
         offers_set = {interaction[WHAT] for interaction in all_interactions_list}
 
-        self.offers_id_map = {offer_name: (index + 1) for index, offer_name in enumerate(offers_set)}
+        self.__offers_id_map = {offer_name: (index + 1) for index, offer_name in enumerate(offers_set)}
 
-        data_frame = self.create_data_frame(all_interactions_list, score_map)
+        data_frame = self.__create_data_frame(all_interactions_list, score_map)
+        train_set, test_set = self.__create_data_sets(data_frame, rating_scale)
 
-        train_set, self.test_set = self.create_data_sets(data_frame, rating_scale)
+        self.__algorithm = self.__train_algorithm(train_set)
+        self.__prediction = self.__calculate_prediction(test_set)
 
-        self.algorithm = self.train_algorithm(train_set)
-
-    def create_data_frame(self, all_interactions_list, score_map):
+    def __create_data_frame(self, all_interactions_list, score_map):
         unique_user_offer_map = {}
 
         for interaction in all_interactions_list:
             user_id = interaction[WHO]
-            offer_id = self.offers_id_map[interaction[WHAT]]
+            offer_id = self.__offers_id_map[interaction[WHAT]]
             score = score_map[interaction[TYPE]]
 
             map_key = (user_id, offer_id)
@@ -60,27 +64,29 @@ class Recommender(object):
         unique_interactions_list = [{USER_ID: user_id, OFFER_ID: offer_id, SCORE: score}
                                     for (user_id, offer_id), score in unique_user_offer_map.items()]
 
-        return pd.DataFrame(unique_interactions_list)
+        return pandas.DataFrame(unique_interactions_list)
 
-    def create_data_sets(self, data_frame, rating_scale):
+    def __create_data_sets(self, data_frame, rating_scale):
         reader = Reader(rating_scale=rating_scale)
         prepared_data = Dataset.load_from_df(data_frame[[USER_ID, OFFER_ID, SCORE]], reader)
         return train_test_split(prepared_data, test_size=.2)
 
-    def train_algorithm(self, train_set):
+    def __train_algorithm(self, train_set):
         algorithm = SVD()
         algorithm.fit(train_set)
         return algorithm
 
+    def __calculate_prediction(self, test_set):
+        return self.__algorithm.test(test_set)
+
     def calculate_rmse(self, verbose=True):
-        prediction = self.algorithm.test(self.test_set)
-        return accuracy.rmse(prediction, verbose=verbose)
+        return accuracy.rmse(self.__prediction, verbose=verbose)
 
     def get_recommendations_for_user(self, user_id: int):
         offers_for_user = []
 
-        for offer_name, offer_id in self.offers_id_map.items():
-            estimation = self.algorithm.predict(user_id, offer_id).est
+        for offer_name, offer_id in self.__offers_id_map.items():
+            estimation = self.__algorithm.predict(user_id, offer_id).est
             offers_for_user.append((offer_name, estimation))
 
         offers_for_user.sort(key=lambda pair: pair[1], reverse=True)
