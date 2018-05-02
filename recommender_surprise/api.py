@@ -1,8 +1,7 @@
-from recommender import Recommender
+from recommender_surprise.recommender import Recommender
 from flask import Flask
 from flask import jsonify
 from flask import request
-
 
 print('STARTING RECOMMENDATION SYSTEM')
 app = Flask(__name__)
