@@ -19,7 +19,7 @@ class Recommender(object):
     __WHO = 'who'
     __WHAT = 'what'
     __TYPE = 'type'
-    __TRACKER_FILE_FOLDER = 'tracker'
+    __TRACKER_FILE_FOLDER = os.path.join('..', 'tracker')
     __INTERACTIONS_FILE_NAMES = [
         'observed-offers.json',
         'reported-offers.json',
