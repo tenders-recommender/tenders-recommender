@@ -2,6 +2,7 @@ from recommender import Recommender
 from flask import Flask
 from flask import jsonify
 from flask import request
+import json
 
 
 print('STARTING RECOMMENDATION SYSTEM')
@@ -25,6 +26,13 @@ def get_recommendations(user_id):
     # against redefining js Array constructor exploit
     return jsonify({'data': recommendations})
 
+@app.route('/rmse/summary')
+def get_rmse_summary():
+    with open('./rmse_summary.json', 'r') as f:
+        data = f.read()
+    return jsonify(data)
+
 
 if __name__ == '__main__':
     app.run()
+

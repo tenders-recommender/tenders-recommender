@@ -9,6 +9,7 @@ from surprise import Reader
 from surprise import SVD
 from surprise import accuracy
 from surprise import dump
+import datetime
 
 
 class Recommender(object):
@@ -72,6 +73,8 @@ class Recommender(object):
 
         # self.__user_predictions = self.__create_user_predictions()
         # print("CREATED TOP PREDICTIONS FOR EVERY USER")
+        self.add_rmse_results_to_file()
+
 
     def __create_data_frame(self, all_interactions_list, score_map):
         unique_user_offer_map = {}
@@ -133,3 +136,19 @@ class Recommender(object):
 
         recommendations.sort(key=lambda pair: pair[1], reverse=True)
         return recommendations[:top_n]
+
+    def add_rmse_results_to_file(self):
+        fname = './rmse_summary.json'
+        entry = {'time': datetime.datetime.now().timestamp(), 'rmse': self.calculate_rmse(verbose=False)}
+        a = []
+        if not os.path.isfile(fname):
+            a.append(entry)
+            with open(fname, mode='w') as f:
+                f.write(json.dumps(a, indent=2))
+        else:
+            with open(fname) as feedsjson:
+                feeds = json.load(feedsjson)
+
+            feeds.append(entry)
+            with open(fname, mode='w') as f:
+                f.write(json.dumps(feeds, indent=2))
