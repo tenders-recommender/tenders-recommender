@@ -1,3 +1,5 @@
+from recommender_surprise.recommendation import Recommendation
+
 import json
 import os
 import itertools
@@ -132,23 +134,22 @@ class Recommender(object):
 
         for user_id, offer_id, true_rating, estimation, _ in self.__all_predictions:
             if given_user_id == user_id:
-                recommendations.append((self.__offers_id_bi_map.inv[offer_id], estimation))
+                recommendations.append(Recommendation(self.__offers_id_bi_map.inv[offer_id], estimation))
 
-        recommendations.sort(key=lambda pair: pair[1], reverse=True)
+        recommendations.sort(key=lambda recommendation: recommendation.estimation, reverse=True)
         return recommendations[:top_n]
 
     def add_rmse_results_to_file(self):
         fname = './rmse_summary.json'
-        entry = {'time': datetime.datetime.now().timestamp(), 'rmse': self.calculate_rmse(verbose=False)}
-        a = []
+        entry = {'timestamp': datetime.datetime.now().timestamp(), 'rmse': self.calculate_rmse(verbose=False)}
+
         if not os.path.isfile(fname):
-            a.append(entry)
             with open(fname, mode='w') as f:
-                f.write(json.dumps(a, indent=2))
+                f.write(json.dumps([entry]))
         else:
             with open(fname) as feedsjson:
                 feeds = json.load(feedsjson)
 
             feeds.append(entry)
             with open(fname, mode='w') as f:
-                f.write(json.dumps(feeds, indent=2))
+                f.write(json.dumps(feeds))

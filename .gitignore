@@ -1,5 +1,6 @@
 ### Own ignore files
 tracker/
+rmse_summary.json
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
