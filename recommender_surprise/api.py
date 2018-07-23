@@ -5,12 +5,18 @@ from flask import jsonify
 from flask import request
 from flask_cors import CORS
 import json
+import datetime
 
 print('STARTING RECOMMENDATION SYSTEM')
+before = datetime.datetime.now()
+
 app = Flask(__name__)
 CORS(app)
-recommender = Recommender(create_inited=True)
+recommender = Recommender()
+
+after = datetime.datetime.now()
 print('READY')
+print('TIME ELAPSED: ' + str((after - before).total_seconds()))
 
 
 @app.route('/rmse')
@@ -27,6 +33,7 @@ def get_recommendations(user_id):
     # json array packed in object so it is safe
     # against redefining js Array constructor exploit
     return jsonify({'data': [r.__dict__ for r in recommendations]})
+
 
 @app.route('/rmse/summary')
 def get_rmse_summary():
