@@ -3,7 +3,7 @@ from recommender_surprise.recommendation import Recommendation
 
 import json
 import os
-import datetime
+from datetime import datetime
 from bidict import bidict
 
 from surprise import AlgoBase
@@ -14,51 +14,36 @@ from surprise import dump
 
 class Recommender(object):
     __SAVED_FOLDER_PATH = 'saved'
-    __DEFAULT_ALG_PATH = os.path.join(__SAVED_FOLDER_PATH, 'alg_pred_dump')
-    __DEFAULT_PARSED_DATA_PATH = os.path.join(__SAVED_FOLDER_PATH, 'parsed_data.bin')
 
     def __init__(self,
-                 create_inited=True,
-                 use_last_alg=False,
-                 save_new_alg=False,
-                 use_parsed_data=False,
-                 save_parsed_data=False,
-                 alg_path=__DEFAULT_ALG_PATH,
-                 parsed_data_path=__DEFAULT_PARSED_DATA_PATH,
-                 *file_paths):
+                 algorithm: AlgoBase = SVD,
+                 earlier_than: datetime = None,
+                 alg_name: str = None,
+                 rmse_file_name: str = None,
+                 alg_file_name: str = None,
+                 parsed_data_file_name: str = None,
+                 *file_names_to_parse):
 
+        self.__algorithm: AlgoBase = algorithm
         self.__offers_id_bi_map: bidict = None
-        self.__algorithm: AlgoBase = None
         self.__all_predictions: list = None
-        self.__user_predictions: dict = None
 
-        if create_inited:
-            self.init(use_last_alg,
-                      save_new_alg,
-                      use_parsed_data,
-                      save_parsed_data,
-                      alg_path,
-                      parsed_data_path,
-                      *file_paths)
+        self.__rmse_file_path = self.__create_file_path(rmse_file_name)
+        self.__alg_file_path = self.__create_file_path(alg_file_name)
+        self.__parsed_data_file_path = self.__create_file_path(parsed_data_file_name)
 
-    def init(self,
-             use_last_alg=False,
-             save_new_alg=False,
-             use_parsed_data=False,
-             save_parsed_data=False,
-             alg_path=__DEFAULT_ALG_PATH,
-             parsed_data_path=__DEFAULT_PARSED_DATA_PATH,
-             *file_paths):
+        self.__init(earlier_than, alg_name, *file_names_to_parse)
 
+    def __init(self, earlier_than, alg_name, *file_names_to_parse):
         parser = Parser()
-        if use_parsed_data and os.path.exists(parsed_data_path):
-            parsed_data = parser.load_from_file(parsed_data_path)
+        if self.__parsed_data_file_path is not None and os.path.exists(self.__parsed_data_file_path):
+            parsed_data = parser.load_from_file(self.__parsed_data_file_path)
             print("LOADED PREVIOUSLY SAVED OFFER_ID <=> OFFER_NAME MAPPING")
             print("LOADED PREVIOUSLY SAVED DATASETS FOR TRAINING AND TESTING")
         else:
-            parsed_data = parser.parse_to_file(parsed_data_path, *file_paths) \
-                if save_parsed_data \
-                else parser.parse(*file_paths)
+            parsed_data = parser.parse_to_file(self.__parsed_data_file_path, *file_names_to_parse) \
+                if self.__parsed_data_file_path is not None \
+                else parser.parse(earlier_than=earlier_than, *file_names_to_parse)
             print("CREATED OFFER_ID <=> OFFER_NAME MAPPING")
             print("CREATED DATASETS FOR TRAINING AND TESTING")
 
@@ -66,25 +51,33 @@ class Recommender(object):
         train_set = parsed_data.train_set
         test_set = parsed_data.test_set
 
-        if use_last_alg and os.path.exists(alg_path):
-            self.__all_predictions, self.__algorithm = dump.load(alg_path)
+        if self.__alg_file_path is not None and os.path.exists(self.__alg_file_path):
+            self.__all_predictions, self.__algorithm = dump.load(self.__alg_file_path)
             print("LOADED PREVIOUSLY SAVED PREDICTIONS AND ALGORITHM")
+            time_elapsed = None
         else:
-            self.__algorithm = self.__train_algorithm(train_set)
+            before_time = datetime.now()
+            self.__train_algorithm(train_set)
             self.__all_predictions = self.__calculate_all_predictions(test_set)
             print("TRAINED ALGORITHM AND CALCULATED PREDICTIONS")
+            time_elapsed = (datetime.now() - before_time).total_seconds()
 
-            if save_new_alg:
-                os.makedirs(os.path.dirname(alg_path), exist_ok=True)
-                dump.dump(alg_path, predictions=self.__all_predictions, algo=self.__algorithm)
+            if self.__alg_file_path is not None:
+                os.makedirs(os.path.dirname(self.__alg_file_path), exist_ok=True)
+                dump.dump(self.__alg_file_path, predictions=self.__all_predictions, algo=self.__algorithm)
                 print("SAVED ALGORITHM AND PREDICTIONS TO FILE")
 
-        self.add_rmse_results_to_file()
+        if self.__rmse_file_path is not None:
+            self.add_rmse_to_file(earlier_than=earlier_than, alg_name=alg_name, time_elapsed=time_elapsed)
+            print("SAVED RMSE TO FILE")
+
+    def __create_file_path(self, file_name):
+        return os.path.join(self.__SAVED_FOLDER_PATH, file_name) \
+            if file_name is not None \
+            else None
 
     def __train_algorithm(self, train_set):
-        algorithm = SVD()
-        algorithm.fit(train_set)
-        return algorithm
+        self.__algorithm.fit(train_set)
 
     def __calculate_all_predictions(self, test_set):
         return self.__algorithm.test(test_set)
@@ -102,17 +95,21 @@ class Recommender(object):
         recommendations.sort(key=lambda recommendation: recommendation.estimation, reverse=True)
         return recommendations[:top_n]
 
-    def add_rmse_results_to_file(self):
-        fname = './rmse_summary.json'
-        entry = {'timestamp': datetime.datetime.now().timestamp(), 'rmse': self.calculate_rmse(verbose=False)}
+    def add_rmse_to_file(self, earlier_than: datetime = None, alg_name: str = None, time_elapsed: float = None):
+        entry = {'rmse': self.calculate_rmse(verbose=False)}
+        if earlier_than is not None:
+            entry['timestamp'] = earlier_than.timestamp()
+        if alg_name is not None:
+            entry['algorithm'] = alg_name
+        if time_elapsed is not None:
+            entry['time_elapsed'] = time_elapsed
 
-        if not os.path.isfile(fname):
-            with open(fname, mode='w') as f:
-                f.write(json.dumps([entry]))
-        else:
-            with open(fname) as feedsjson:
-                feeds = json.load(feedsjson)
+        entries = []
+        if os.path.isfile(self.__rmse_file_path):
+            with open(self.__rmse_file_path, 'r') as rmse_file:
+                entries: list = json.load(rmse_file)
 
-            feeds.append(entry)
-            with open(fname, mode='w') as f:
-                f.write(json.dumps(feeds))
+        entries.append(entry)
+
+        with open(self.__rmse_file_path, 'w') as rmse_file:
+            json.dump(entries, rmse_file)

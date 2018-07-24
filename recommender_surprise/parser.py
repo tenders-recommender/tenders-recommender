@@ -5,6 +5,8 @@ import itertools
 import json
 import pandas
 import pickle
+import dateutil.parser
+from datetime import datetime
 from bidict import bidict
 from surprise import Reader, Dataset
 
@@ -15,6 +17,7 @@ class Parser(object):
     __SCORE = 'score'
     __WHO = 'who'
     __WHAT = 'what'
+    __WHEN = 'when'
     __TYPE = 'type'
     __TRACKER_FILE_FOLDER = os.path.join('..', 'tracker')
     __INTERACTIONS_FILE_NAMES = [
@@ -29,13 +32,20 @@ class Parser(object):
     }
     __DEFAULT_SCALE = (1, 5)
 
-    def parse(self, score_map=__DEFAULT_SCORE_MAP, rating_scale=__DEFAULT_SCALE, *file_paths):
+    def parse(self, earlier_than: datetime=None, score_map=__DEFAULT_SCORE_MAP, rating_scale=__DEFAULT_SCALE,
+              *file_paths):
         if len(file_paths) == 0:
             file_paths = [os.path.join(self.__TRACKER_FILE_FOLDER, file_name) for file_name in
                           self.__INTERACTIONS_FILE_NAMES]
 
-        all_interactions_list = list(itertools.chain.from_iterable(
-            [json.load(open(file_path)) for file_path in file_paths]))
+        all_interactions = itertools.chain.from_iterable([json.load(open(file_path)) for file_path in file_paths])
+
+        if earlier_than is not None:
+            all_interactions_list = list(map(lambda interaction:
+                                             dateutil.parser.parse(interaction[self.__WHEN]) < earlier_than,
+                                             all_interactions))
+        else:
+            all_interactions_list = list(all_interactions)
 
         offers_set = {interaction[self.__WHAT] for interaction in all_interactions_list}
         offers_id_bi_map = bidict({offer_name: (index + 1) for index, offer_name in enumerate(offers_set)})
