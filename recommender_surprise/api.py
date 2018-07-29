@@ -42,6 +42,12 @@ def get_rmse_summary():
     return jsonify({'data': data})
 
 
+@app.route('/alg/comparison')
+def get_alg_comparison():
+    with open('plots/data/rmse_alg.json', 'r') as f:
+        data = json.load(f)
+    return jsonify({'data': data})
+
+
 if __name__ == '__main__':
     app.run()
-
