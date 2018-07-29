@@ -57,7 +57,6 @@ export class AlgorithmsComponent implements OnInit {
           type: 'bar',
           data: chartData,
           options: {
-            barValueSpacing: 20,
             scales: {
               yAxes: [{
                 ticks: {
