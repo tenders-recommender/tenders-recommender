@@ -1,20 +1,19 @@
 import os
 from datetime import datetime
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Optional
 
 from bidict import bidict
-from numpy.core.multiarray import ndarray
 from surprise import AlgoBase, Trainset, Prediction, KNNBasic
 from surprise import accuracy
 from surprise import dump
 
-from recommender_surprise.dto import Recommendation, ParsedData
+from recommender_surprise.dto import Recommendation, ParsedData, Testset
 from recommender_surprise.parser import Parser
 
 
 class Recommender(object):
     def __init__(self,
-                 algorithm: AlgoBase = KNNBasic,
+                 algorithm: AlgoBase = KNNBasic(),
                  earlier_than: datetime = None,
                  alg_file_path: str = None,
                  parsed_data_file_path: str = None,
@@ -66,7 +65,7 @@ class Recommender(object):
     def __train_algorithm(self, train_set: Trainset) -> None:
         self.__algorithm.fit(train_set)
 
-    def __calculate_all_predictions(self, test_set: List[Tuple[str, str, Union[ndarray, float]]]) -> List[Prediction]:
+    def __calculate_all_predictions(self, test_set: Testset) -> List[Prediction]:
         return self.__algorithm.test(test_set)
 
     def __load_predicitons_and_alg(self, file_path: str) -> Tuple[List[Prediction], AlgoBase]:

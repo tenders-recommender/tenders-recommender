@@ -3,16 +3,15 @@ import os
 import pickle
 from datetime import datetime
 from itertools import chain
-from typing import List, Tuple, Union, Dict, Iterator, Callable, Set
+from typing import List, Tuple, Dict, Iterator, Callable, Set
 
 import dateutil.parser
 from bidict import bidict
-from numpy.core.multiarray import ndarray
 from pandas import DataFrame
 from surprise import Reader, Dataset, Trainset
 from surprise.dataset import DatasetAutoFolds
 
-from recommender_surprise.dto import ParsedData
+from recommender_surprise.dto import ParsedData, Interaction, Testset
 
 
 class Parser(object):
@@ -23,7 +22,7 @@ class Parser(object):
     __WHAT: str = 'what'
     __WHEN: str = 'when'
     __TYPE: str = 'type'
-    __TRACKER_FILE_FOLDER: str = os.path.join('..', 'tracker')
+    __TRACKER_FILE_FOLDER: str = os.path.join('..', '..', 'tracker')
     __INTERACTIONS_FILE_NAMES: List[str] = [
         'observed-offers.json',
         'reported-offers.json',
@@ -47,13 +46,13 @@ class Parser(object):
             file_paths: Tuple[str, ...] = tuple(os.path.join(self.__TRACKER_FILE_FOLDER, file_name) for file_name in
                                                 self.__INTERACTIONS_FILE_NAMES)
 
-        all_interactions_chain: Iterator[Dict[str, Union[str, int, float]]] = chain.from_iterable(
+        all_interactions_chain: Iterator[Interaction] = chain.from_iterable(
             [json.load(open(file_path)) for file_path in file_paths])
 
-        is_interaction_earlier_than: Callable[Dict[str, Union[str, int, float]], bool] = \
+        is_interaction_earlier_than: Callable[Interaction, bool] = \
             lambda interaction: dateutil.parser.parse(interaction[self.__WHEN]) < earlier_than
 
-        all_interactions: Tuple[Dict[str, Union[str, int, float]], ...] = tuple(all_interactions_chain) \
+        all_interactions: Tuple[Interaction, ...] = tuple(all_interactions_chain) \
             if earlier_than is None \
             else tuple(filter(is_interaction_earlier_than, all_interactions_chain))
 
@@ -66,7 +65,7 @@ class Parser(object):
             return ParsedData(offers_id_bi_map, data_frame=data_frame)
 
         train_set: Trainset
-        test_set: List[Tuple[str, str, Union[ndarray, float]]]
+        test_set: Testset
         train_set, test_set = self.__create_data_sets(data_frame, rating_scale)
 
         return ParsedData(offers_id_bi_map, train_set=train_set, test_set=test_set)
@@ -96,7 +95,7 @@ class Parser(object):
 
     def __create_data_frame(self,
                             offers_id_bi_map: bidict,
-                            all_interactions: Tuple[Dict[str, Union[str, int, float]], ...],
+                            all_interactions: Tuple[Interaction, ...],
                             score_map: Dict[str, float]) -> DataFrame:
         unique_user_offer_map: Dict[Tuple[int, str], float] = {}
 
@@ -109,7 +108,7 @@ class Parser(object):
             if map_key not in unique_user_offer_map or unique_user_offer_map[map_key] < score:
                 unique_user_offer_map[map_key] = score
 
-        unique_interactions_list: List[Dict[str, Union[str, int, float]]] = \
+        unique_interactions_list: List[Interaction] = \
             [{self.__USER_ID: user_id, self.__OFFER_ID: offer_id, self.__SCORE: score}
              for (user_id, offer_id), score in unique_user_offer_map.items()]
 
@@ -118,12 +117,12 @@ class Parser(object):
     def __create_data_sets(self,
                            data_frame: DataFrame,
                            rating_scale: Tuple[float, float]) \
-            -> Tuple[Trainset, List[Tuple[str, str, Union[ndarray, float]]]]:
+            -> Tuple[Trainset, Testset]:
 
         reader: Reader = Reader(rating_scale=rating_scale)
         prepared_data: DatasetAutoFolds = Dataset.load_from_df(
             data_frame[[self.__USER_ID, self.__OFFER_ID, self.__SCORE]], reader)
 
         train_set: Trainset = prepared_data.build_full_trainset()
-        test_set: List[Tuple[str, str, Union[ndarray, float]]] = train_set.build_anti_testset()
+        test_set: Testset = train_set.build_anti_testset()
         return train_set, test_set
