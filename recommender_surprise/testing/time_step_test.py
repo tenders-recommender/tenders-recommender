@@ -1,10 +1,11 @@
 import random
+from datetime import datetime, timedelta
 
 import numpy as np
-from surprise import KNNBasic, SVD
-from datetime import datetime, timedelta
 import pytz
-from recommender_surprise.recommender import Recommender
+from surprise import KNNBasic
+
+from recommender_surprise.service import Recommender
 
 
 def main():

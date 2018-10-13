@@ -1,14 +1,15 @@
-from recommender_surprise.parsed_data import ParsedData
-
-import os
 import itertools
 import json
-import pandas
+import os
 import pickle
-import dateutil.parser
 from datetime import datetime
+
+import dateutil.parser
+import pandas
 from bidict import bidict
 from surprise import Reader, Dataset
+
+from recommender_surprise.dto import ParsedData
 
 
 class Parser(object):
@@ -32,8 +33,13 @@ class Parser(object):
     }
     __DEFAULT_SCALE = (1, 5)
 
-    def parse(self, earlier_than: datetime = None, score_map=__DEFAULT_SCORE_MAP, rating_scale=__DEFAULT_SCALE,
-              without_train_set=False, *file_paths):
+    def parse(self,
+              earlier_than: datetime = None,
+              score_map=__DEFAULT_SCORE_MAP,
+              rating_scale=__DEFAULT_SCALE,
+              without_train_set=False,
+              *file_paths):
+
         if len(file_paths) == 0:
             file_paths = [os.path.join(self.__TRACKER_FILE_FOLDER, file_name) for file_name in
                           self.__INTERACTIONS_FILE_NAMES]
@@ -59,10 +65,17 @@ class Parser(object):
 
         return ParsedData(offers_id_bi_map, train_set, test_set)
 
-    def parse_to_file(self, result_file_path, score_map=__DEFAULT_SCORE_MAP, rating_scale=__DEFAULT_SCALE, *file_paths):
+    def parse_to_file(self,
+                      result_file_path,
+                      score_map=__DEFAULT_SCORE_MAP,
+                      rating_scale=__DEFAULT_SCALE,
+                      *file_paths):
+
         parsed_data = self.parse(score_map=score_map, rating_scale=rating_scale, *file_paths)
 
-        os.makedirs(os.path.dirname(result_file_path), exist_ok=True)
+        dirname = os.path.dirname(result_file_path)
+        if dirname is not None and dirname != '':
+            os.makedirs(dirname, exist_ok=True)
         with open(result_file_path, 'wb') as result_file:
             pickle.dump(parsed_data, result_file)
 

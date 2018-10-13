@@ -1,1 +1,2 @@
-rmse_summary.json
+*.json
+*.bin

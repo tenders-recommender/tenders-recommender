@@ -1,10 +1,11 @@
 import json
+import os.path
+
+import pandas as pd
+from surprise import KNNBasic, Dataset, Reader
+from surprise.model_selection import GridSearchCV
 
 from recommender_surprise.parser import Parser
-from surprise import KNNBasic, Dataset, Reader, SVD
-from surprise.model_selection import GridSearchCV
-import pandas as pd
-import os.path
 
 
 def main():

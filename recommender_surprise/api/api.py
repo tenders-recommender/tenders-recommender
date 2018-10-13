@@ -1,33 +1,35 @@
-from recommender_surprise.recommender import Recommender
+import json
+from datetime import datetime
 
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_cors import CORS
-import json
-import datetime
+
+from recommender_surprise.service import Recommender
 
 print('STARTING RECOMMENDATION SYSTEM')
-before = datetime.datetime.now()
+before = datetime.now()
 
 app = Flask(__name__)
 CORS(app)
 recommender = Recommender()
 
-after = datetime.datetime.now()
+after = datetime.now()
 print('READY')
 print('TIME ELAPSED: ' + str((after - before).total_seconds()))
 
 
 @app.route('/rmse')
 def get_rmse():
-    return jsonify(recommender.calculate_rmse(verbose=False))
+    return jsonify(recommender.calculate_rmse())
 
 
 @app.route('/recommendations/<int:user_id>')
 def get_recommendations(user_id):
     top = request.args.get('top', type=int)
-    recommendations = recommender.get_recommendations(user_id, top_n=top) if top \
+    recommendations = recommender.get_recommendations(user_id, top_n=top) \
+        if top \
         else recommender.get_recommendations(user_id)
 
     # json array packed in object so it is safe
