@@ -1,43 +1,44 @@
 import os
 from datetime import datetime
+from typing import List, Tuple, Union, Optional
 
 from bidict import bidict
-from surprise import AlgoBase
-from surprise import SVD
+from numpy.core.multiarray import ndarray
+from surprise import AlgoBase, Trainset, Prediction, KNNBasic
 from surprise import accuracy
 from surprise import dump
 
-from recommender_surprise.dto import Recommendation
+from recommender_surprise.dto import Recommendation, ParsedData
 from recommender_surprise.parser import Parser
 
 
 class Recommender(object):
     def __init__(self,
-                 algorithm: AlgoBase = SVD,
+                 algorithm: AlgoBase = KNNBasic,
                  earlier_than: datetime = None,
                  alg_file_path: str = None,
                  parsed_data_file_path: str = None,
-                 *file_names_to_parse):
+                 *file_names_to_parse: str):
 
         self.__algorithm: AlgoBase = algorithm
-        self.__time_elapsed = None
-        self.__offers_id_bi_map: bidict = None
-        self.__all_predictions: list = None
+        self.__time_elapsed: int
+        self.__offers_id_bi_map: bidict
+        self.__all_predictions: List[Prediction]
 
-        self.__alg_file_path = alg_file_path
-        self.__parsed_data_file_path = parsed_data_file_path
+        self.__alg_file_path: Optional[str] = alg_file_path
+        self.__parsed_data_file_path: Optional[str] = parsed_data_file_path
 
         self.__init(earlier_than, *file_names_to_parse)
 
-    def __init(self, earlier_than, *file_names_to_parse):
-        parser = Parser()
+    def __init(self, earlier_than: Optional[datetime], *file_names_to_parse: str):
+        parser: Parser = Parser()
 
         if self.__parsed_data_file_path is not None and os.path.exists(self.__parsed_data_file_path):
-            parsed_data = parser.load_from_file(self.__parsed_data_file_path)
+            parsed_data: ParsedData = parser.load_from_file(self.__parsed_data_file_path)
             print("LOADED PREVIOUSLY SAVED OFFER_ID <=> OFFER_NAME MAPPING")
             print("LOADED PREVIOUSLY SAVED DATASETS FOR TRAINING AND TESTING")
         else:
-            parsed_data = parser.parse_to_file(self.__parsed_data_file_path, *file_names_to_parse) \
+            parsed_data: ParsedData = parser.parse_to_file(self.__parsed_data_file_path, *file_names_to_parse) \
                 if self.__parsed_data_file_path is not None \
                 else parser.parse(earlier_than=earlier_than, *file_names_to_parse)
             print("CREATED OFFER_ID <=> OFFER_NAME MAPPING")
@@ -48,7 +49,7 @@ class Recommender(object):
         test_set = parsed_data.test_set
 
         if self.__alg_file_path is not None and os.path.exists(self.__alg_file_path):
-            self.__all_predictions, self.__algorithm = dump.load(self.__alg_file_path)
+            self.__all_predictions, self.__algorithm = self.__load_predicitons_and_alg(self.__alg_file_path)
             print("LOADED PREVIOUSLY SAVED PREDICTIONS AND ALGORITHM")
         else:
             before_time = datetime.now()
@@ -62,17 +63,20 @@ class Recommender(object):
                 dump.dump(self.__alg_file_path, predictions=self.__all_predictions, algo=self.__algorithm)
                 print("SAVED ALGORITHM AND PREDICTIONS TO FILE")
 
-    def __train_algorithm(self, train_set):
+    def __train_algorithm(self, train_set: Trainset) -> None:
         self.__algorithm.fit(train_set)
 
-    def __calculate_all_predictions(self, test_set):
+    def __calculate_all_predictions(self, test_set: List[Tuple[str, str, Union[ndarray, float]]]) -> List[Prediction]:
         return self.__algorithm.test(test_set)
 
-    def calculate_rmse(self, verbose=False):
+    def __load_predicitons_and_alg(self, file_path: str) -> Tuple[List[Prediction], AlgoBase]:
+        return dump.load(file_path)
+
+    def calculate_rmse(self, verbose: bool = False) -> float:
         return accuracy.rmse(self.__all_predictions, verbose=verbose)
 
-    def get_recommendations(self, given_user_id: int, top_n: int = 10):
-        recommendations = []
+    def get_recommendations(self, given_user_id: int, top_n: int = 10) -> List[Recommendation]:
+        recommendations: List[Recommendation] = []
 
         for user_id, offer_id, true_rating, estimation, _ in self.__all_predictions:
             if given_user_id == user_id:
