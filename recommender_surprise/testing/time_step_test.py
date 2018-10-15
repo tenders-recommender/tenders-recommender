@@ -13,11 +13,11 @@ def main():
     random.seed(seed)
     np.random.seed(seed)
 
-    k = 10
+    k = 20
     min_k = 3
-    sim_options = {'name': 'cosine',
-                   'min_support': 1,
-                   'user_based': False
+    sim_options = {'name': 'pearson',
+                   'min_support': 2,
+                   'user_based': True
                    }
     knn = KNNBasic(k=k, min_k=min_k, sim_options=sim_options)
 
@@ -30,8 +30,7 @@ def main():
         print(start_date.strftime("%Y-%m-%d"))
         Recommender(earlier_than=start_date,
                     algorithm=knn,
-                    alg_name=KNNBasic.__name__,
-                    rmse_file_name='Knn_rmse_summary.json')
+                    parsed_data_file_path='rmse_summary.json')
         start_date += delta
 
 
