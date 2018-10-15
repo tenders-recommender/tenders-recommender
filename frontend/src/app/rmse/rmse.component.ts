@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 
 import * as Chart from 'chart.js';
 
-import { RMSE } from '../rmse';
-import { ApiData } from '../api-data';
+import { RMSE } from '../model/rmse';
+import { ApiData } from '../model/api-data';
 
 @Component({
   selector: 'app-rmse',

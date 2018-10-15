@@ -1,8 +1,8 @@
 import {Component, ElementRef, OnInit} from "@angular/core";
 import * as Chart from 'chart.js';
 import {HttpClient} from '@angular/common/http';
-import {ApiData} from "../api-data";
-import {Algorithm} from "../algorithm";
+import {ApiData} from "../model/api-data";
+import {Algorithm} from "../model/algorithm";
 import {algorithm_list} from "../const/constants";
 
 
@@ -23,7 +23,6 @@ export class AlgorithmsComponent implements OnInit {
 
     this.http.get(url).subscribe(
       data => {
-        console.log(data);
         const list = (data as ApiData).data as Array<any>;
         const grouped = this.groupBy(list, json => json.algorithm);
         this.results = algorithm_list.map(alg_name => this.createAlgorithm(grouped.get(alg_name)));

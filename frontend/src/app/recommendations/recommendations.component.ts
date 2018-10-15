@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Recommendation } from '../recommendation';
-import { ApiData } from '../api-data';
+import { Recommendation } from '../model/recommendation';
+import { ApiData } from '../model/api-data';
 
 @Component({
   selector: 'app-recommendations',
