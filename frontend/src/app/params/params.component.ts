@@ -25,8 +25,8 @@ export class ParamsComponent implements OnInit {
         console.log(this.params)
         const dataSet = this.params.map(param => {
           return {
-            'x': param.rmse,
-            'y': param.time_elapsed
+            'x': param.time_elapsed,
+            'y': param.rmse
           }
         });
 
@@ -49,7 +49,7 @@ export class ParamsComponent implements OnInit {
           labels: tooltips,
           datasets: [
             {
-              label: "Time Elapsed",
+              label: "Test point",
               backgroundColor: "#8e5ea2",
               data: dataSet
             }
@@ -66,14 +66,14 @@ export class ParamsComponent implements OnInit {
               yAxes: [{
                 scaleLabel: {
                   display: true,
-                  labelString: 'Time Elapsed'
+                  labelString: 'RMSE'
                 },
                 type: 'linear'
               }],
               xAxes: [{
                 scaleLabel: {
                   display: true,
-                  labelString: 'RMSE'
+                  labelString: 'Time Elapsed'
                 },
                 type: 'linear'
               }]

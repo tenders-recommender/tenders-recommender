@@ -29,7 +29,7 @@ export class AlgorithmsComponent implements OnInit {
         const dataSet = [];
 
         this.results.forEach(a => {
-          dataSet.push({'x': a.getAverageRmse(), 'y': a.getAverageTimeElapsed()});
+          dataSet.push({'x': a.getAverageTimeElapsed(), 'y': a.getAverageRmse()});
         });
 
         const ctx = this.elementRef.nativeElement.querySelector('#algoPlot').getContext('2d');
@@ -53,14 +53,14 @@ export class AlgorithmsComponent implements OnInit {
               yAxes: [{
                 scaleLabel: {
                   display: true,
-                  labelString: 'Time Elapsed'
+                  labelString: 'RMSE'
                 },
                 type: 'linear'
               }],
               xAxes: [{
                 scaleLabel: {
                   display: true,
-                  labelString: 'RMSE'
+                  labelString: 'Time Elapsed'
                 },
                 type: 'linear'
               }]
