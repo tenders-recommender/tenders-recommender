@@ -8,13 +8,15 @@ import { RecommendationsComponent } from './recommendations/recommendations.comp
 import { RmseComponent } from './rmse/rmse.component';
 import { AppRoutingModule } from './app-routing.module';
 import {AlgorithmsComponent} from "./algorithms/algorithms.component";
+import {ParamsComponent} from "./params/params.component";
 
 @NgModule({
   declarations: [
     AppComponent,
     RecommendationsComponent,
     RmseComponent,
-    AlgorithmsComponent
+    AlgorithmsComponent,
+    ParamsComponent
   ],
   imports: [
     BrowserModule,

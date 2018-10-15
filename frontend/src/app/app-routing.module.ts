@@ -3,12 +3,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { RecommendationsComponent } from './recommendations/recommendations.component';
 import { RmseComponent } from './rmse/rmse.component';
 import {AlgorithmsComponent} from "./algorithms/algorithms.component";
+import {ParamsComponent} from "./params/params.component";
 
 const routes: Routes = [
   { path: '', redirectTo: '/recommendations', pathMatch: 'full' },
   { path: 'recommendations', component: RecommendationsComponent },
   { path: 'rmse', component: RmseComponent },
-  { path: 'algorithms', component: AlgorithmsComponent}
+  { path: 'algorithms', component: AlgorithmsComponent},
+  { path: 'params', component: ParamsComponent}
 ];
 
 @NgModule({

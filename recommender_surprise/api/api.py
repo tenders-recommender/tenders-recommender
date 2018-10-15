@@ -53,5 +53,13 @@ def get_alg_comparison():
     return jsonify({'data': data})
 
 
+@app.route('/param/comparison')
+def get_param_comparison():
+    with open('plots/data/rmse_params.json', 'r') as f:
+        t = Dict[str, Union[str, int, bool]]
+        data: Dict[str, Union[str, int, float, t]] = json.load(f)
+    return jsonify({'data': data})
+
+
 if __name__ == '__main__':
     app.run()
