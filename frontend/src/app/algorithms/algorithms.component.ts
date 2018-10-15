@@ -26,12 +26,10 @@ export class AlgorithmsComponent implements OnInit {
         const list = (data as ApiData).data as Array<any>;
         const grouped = this.groupBy(list, json => json.algorithm);
         this.results = algorithm_list.map(alg_name => this.createAlgorithm(grouped.get(alg_name)));
-        const rmseAverage = [];
-        const timeAverage = [];
+        const dataSet = [];
 
         this.results.forEach(a => {
-          rmseAverage.push(a.getAverageRmse());
-          timeAverage.push(a.getAverageTimeElapsed());
+          dataSet.push({'x': a.getAverageRmse(), 'y': a.getAverageTimeElapsed()});
         });
 
         const ctx = this.elementRef.nativeElement.querySelector('#algoPlot').getContext('2d');
@@ -40,28 +38,41 @@ export class AlgorithmsComponent implements OnInit {
           labels: algorithm_list,
           datasets: [
             {
-              label: "Time Elapsed",
+              label: "Algorithm",
               backgroundColor: "blue",
-              data: timeAverage
+              data: dataSet
             },
-            {
-              label: "RMSE",
-              backgroundColor: "red",
-              data: rmseAverage
-            }
           ]
         };
 
         this.plot = new Chart(ctx, {
-          type: 'bar',
+          type: 'scatter',
           data: chartData,
           options: {
             scales: {
               yAxes: [{
-                ticks: {
-                  min: 0,
-                }
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Time Elapsed'
+                },
+                type: 'linear'
+              }],
+              xAxes: [{
+                scaleLabel: {
+                  display: true,
+                  labelString: 'RMSE'
+                },
+                type: 'linear'
               }]
+            },
+            tooltips: {
+              enabled: true,
+              callbacks: {
+                label: function (tooltipItem, data) {
+                  return ['RMSE:' + tooltipItem.xLabel,
+                    'Time:' + tooltipItem.yLabel].concat(["Algorithm: " + data.labels[tooltipItem.index]])
+                }
+              }
             }
           }
         });
