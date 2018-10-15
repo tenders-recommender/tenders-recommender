@@ -3,7 +3,6 @@ import * as Chart from 'chart.js';
 import {Params} from "../model/params";
 import {HttpClient} from "@angular/common/http";
 import {ApiData} from "../model/api-data";
-import {algorithm_list} from "../const/constants";
 
 @Component({
   selector: 'app-rmse',
@@ -32,11 +31,13 @@ export class ParamsComponent implements OnInit {
         });
 
         const tooltips = this.params.map(param => {
-          return {
-            'k': param.k,
-            'k_min': param.min_k,
-            'sim_optrions': param.simoptions
-          }
+          return [
+            "k: " + param.k,
+            "k_min: " + param.min_k,
+            "min_support: " + param.simoptions.min_support,
+            "name: " + param.simoptions.name,
+            "user_based: " + param.simoptions.user_based
+          ]
         });
 
         console.log(dataSet);
@@ -45,14 +46,15 @@ export class ParamsComponent implements OnInit {
 
 
         let chartData = {
-          labels: algorithm_list,
+          labels: tooltips,
           datasets: [
             {
               label: "Time Elapsed",
               backgroundColor: "#8e5ea2",
               data: dataSet
             }
-          ]
+          ],
+          other: tooltips
 
         };
 
@@ -75,6 +77,15 @@ export class ParamsComponent implements OnInit {
                 },
                 type: 'linear'
               }]
+            },
+            tooltips: {
+              enabled: true,
+              callbacks: {
+                label: function (tooltipItem, data) {
+                  return ['RMSE:' + tooltipItem.xLabel,
+                    'Time:' + tooltipItem.yLabel].concat(data.labels[tooltipItem.index]);
+                }
+              }
             }
           }
         });
