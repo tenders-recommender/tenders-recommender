@@ -82,8 +82,8 @@ export class ParamsComponent implements OnInit {
               enabled: true,
               callbacks: {
                 label: function (tooltipItem, data) {
-                  return ['RMSE:' + tooltipItem.xLabel,
-                    'Time:' + tooltipItem.yLabel].concat(data.labels[tooltipItem.index]);
+                  return ['Time:' + tooltipItem.xLabel,
+                     'RMSE:'+ tooltipItem.yLabel].concat(data.labels[tooltipItem.index]);
                 }
               }
             }
