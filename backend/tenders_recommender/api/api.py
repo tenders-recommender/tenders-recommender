@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 from typing import List, Optional, Dict, Union
 
 from flask import Flask
@@ -7,25 +6,27 @@ from flask import jsonify
 from flask import request
 from flask_cors import CORS
 
-from recommender_surprise.dto import Recommendation, Interaction
-from recommender_surprise.service.recommender_service import RecommenderService
-
+from dto import Interaction, Recommendation
+from service import RecommenderService
 
 # json arrays are packed in object so it is safe
 # against redefining js Array constructor exploit
 
 app: Flask = Flask(__name__)
 CORS(app)
-recommender_service: RecommenderService = RecommenderService()
+recommender_service: RecommenderService = RecommenderService(cache_size=50)
 
 
-@app.route('/populate_interactions', methods=['POST'])
+@app.route('/populate_interactions', method='POST')
 def populate_interactions():
     interactions: Optional[List[Interaction]] = request.get_json()
     if interactions:
         recommender_service.populate_interactions(interactions)
 
 
+@app.route('/train_algorithm')
+def train_algorithm():
+    recommender_service.train_algorithm()
 
 
 @app.route('/rmse')

@@ -2,7 +2,7 @@ from typing import List
 
 from surprise import AlgoBase, Trainset, Prediction
 
-from recommender_surprise.dto import Testset
+from dto import Testset
 
 
 class AlgoTrainer(object):

@@ -1,14 +1,13 @@
 import operator
-from threading import RLock
 from typing import List
 
 from cachetools import LRUCache, cachedmethod
 from surprise import KNNBasic, Prediction, AlgoBase
 
-from recommender_surprise.dto import Recommendation, Interaction, ParsedData
-from recommender_surprise.service.parser import Parser
-from recommender_surprise.service.algo_trainer import AlgoTrainer
-from recommender_surprise.service.recommender import Recommender
+from dto import Recommendation, Interaction, ParsedData
+from parser import Parser
+from trainer import AlgoTrainer
+from service import Recommender
 
 
 class RecommenderService(object):
@@ -19,13 +18,16 @@ class RecommenderService(object):
         self.__recommender: Recommender = None
 
     def populate_interactions(self, new_interactions: List[Interaction]):
-        self.__interactions += new_interactions
+        self.__interactions.extend(new_interactions)
 
-    def train_algorithm(self):
-        parser: Parser = Parser()
-        parsed_data: ParsedData = parser.parse(self.__interactions)
+    def train_algorithm(self, interactions: List[Interaction] = None):
+        if not interactions:
+            interactions = self.__interactions.copy()
+        self.__interactions.clear()
 
-        algo: AlgoBase = KNNBasic(
+        parsed_data: ParsedData = Parser.parse(interactions)
+
+        algorithm: AlgoBase = KNNBasic(
             k=45,
             min_k=1,
             sim_options={
@@ -34,9 +36,9 @@ class RecommenderService(object):
                 'user_based': True
             }
         )
-        all_predictions: List[Prediction] = AlgoTrainer.train(parsed_data.train_set, parsed_data.test_set, algo)
+        all_predictions: List[Prediction] = AlgoTrainer.train(parsed_data.train_set, parsed_data.test_set, algorithm)
 
-        self.__recommender = Recommender(parsed_data.offers_id_bi_map.inv, all_predictions)
+        self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
         self.cache.clear()
 
     @cachedmethod(operator.attrgetter('cache'))
