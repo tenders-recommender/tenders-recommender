@@ -1,0 +1,22 @@
+from typing import List
+
+from surprise import AlgoBase, Trainset, Prediction
+
+from recommender_surprise.dto import Testset
+
+
+class AlgoTrainer(object):
+    @staticmethod
+    def train(train_set: Trainset,
+              test_set: Testset,
+              algorithm: AlgoBase) -> List[Prediction]:
+        AlgoTrainer.__train_algorithm(algorithm, train_set)
+        return AlgoTrainer.__calculate_all_predictions(algorithm, test_set)
+
+    @staticmethod
+    def __train_algorithm(algorithm: AlgoBase, train_set: Trainset) -> None:
+        algorithm.fit(train_set)
+
+    @staticmethod
+    def __calculate_all_predictions(algorithm: AlgoBase, test_set: Testset) -> List[Prediction]:
+        return algorithm.test(test_set)

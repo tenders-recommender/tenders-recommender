@@ -5,7 +5,7 @@ import random
 import numpy as np
 from surprise import KNNBasic
 
-from recommender_surprise.service import Recommender
+from recommender_surprise.service import AlgoTrainer
 
 SAVED_FOLDER_PATH = 'saved'
 
@@ -34,7 +34,7 @@ def main():
 
                     print("TESTING PARAMS: " + str(k) + ", " + str(min_k) + ", " + str(sim_options))
                     try:
-                        r = Recommender(algorithm=knn, parsed_data_file_path=create_file_path('parsed_data.bin'))
+                        r = AlgoTrainer(algorithm=knn, parsed_data_file_path=create_file_path('parsed_data.bin'))
 
                         add_rmse_to_file(r.calculate_rmse(),
                                          create_file_path('rmse_params.json'),

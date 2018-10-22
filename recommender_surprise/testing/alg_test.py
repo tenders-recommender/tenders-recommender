@@ -5,7 +5,7 @@ import random
 import numpy as np
 from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans
 
-from recommender_surprise.service import Recommender
+from recommender_surprise.service import AlgoTrainer
 
 SAVED_FOLDER_PATH = 'saved'
 
@@ -21,7 +21,7 @@ def main():
         for alg_to_test in alg_list:
             print("TESTING ALGORITHM: " + alg_to_test.__name__ + ", TIME: " + str(test_number))
             try:
-                r = Recommender(algorithm=alg_to_test(), parsed_data_file_path=create_file_path('parsed_data.bin'))
+                r = AlgoTrainer(algorithm=alg_to_test(), parsed_data_file_path=create_file_path('parsed_data.bin'))
 
                 add_rmse_to_file(r.calculate_rmse(),
                                  create_file_path('rmse_alg.json'),
