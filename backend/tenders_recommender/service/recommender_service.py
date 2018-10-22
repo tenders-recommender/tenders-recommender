@@ -6,8 +6,8 @@ from surprise import KNNBasic, Prediction, AlgoBase
 
 from dto import Recommendation, Interaction, ParsedData
 from parser import Parser
+from recommender import Recommender
 from trainer import AlgoTrainer
-from service import Recommender
 
 
 class RecommenderService(object):
@@ -36,7 +36,10 @@ class RecommenderService(object):
                 'user_based': True
             }
         )
-        all_predictions: List[Prediction] = AlgoTrainer.train(parsed_data.train_set, parsed_data.test_set, algorithm)
+
+        all_predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
+                                                                         parsed_data.test_set,
+                                                                         algorithm)
 
         self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
         self.cache.clear()

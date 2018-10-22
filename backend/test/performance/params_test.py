@@ -1,14 +1,11 @@
-import json
-import os
 import random
-from typing import Tuple, Union
+from datetime import datetime
 
 import numpy as np
-from datetime import datetime
 from surprise import KNNBasic
 
 from parser import Parser
-from service import Recommender
+from recommender import Recommender
 from test_util import load_test_interactions, add_rmse_to_file
 from trainer import AlgoTrainer
 
@@ -41,9 +38,9 @@ def main():
                     print("TESTING PARAMS: " + str(k) + ", " + str(min_k) + ", " + str(sim_options))
                     try:
                         before = datetime.now()
-                        predictions = AlgoTrainer.train(parsed_data.train_set,
-                                                        parsed_data.test_set,
-                                                        knn)
+                        predictions = AlgoTrainer.calc_predictions(parsed_data.train_set,
+                                                                   parsed_data.test_set,
+                                                                   knn)
                         time_elapsed = (datetime.now() - before).total_seconds()
 
                         recommender = Recommender(parsed_data.ids_offers_map, predictions)

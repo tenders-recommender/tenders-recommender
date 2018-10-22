@@ -1,15 +1,13 @@
-import json
-import os
 import random
+from datetime import datetime
 from typing import List
 
 import numpy as np
-from datetime import datetime
 from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
 
 from dto import Interaction, ParsedData
 from parser import Parser
-from service import Recommender
+from recommender import Recommender
 from test_util import load_test_interactions, add_rmse_to_file
 from trainer import AlgoTrainer
 
@@ -29,9 +27,9 @@ def main():
             print("TESTING ALGORITHM: " + alg_to_test.__name__ + ", TIME: " + str(test_number))
             try:
                 before = datetime.now()
-                predictions: List[Prediction] = AlgoTrainer.train(parsed_data.train_set,
-                                                                  parsed_data.test_set,
-                                                                  alg_to_test())
+                predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
+                                                                             parsed_data.test_set,
+                                                                             alg_to_test())
                 time_elapsed = (datetime.now() - before).total_seconds()
 
                 recommender = Recommender(parsed_data.ids_offers_map, predictions)

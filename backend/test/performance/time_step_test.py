@@ -8,7 +8,7 @@ from surprise import KNNBasic
 
 from dto import Interaction
 from parser import Parser
-from service import Recommender
+from recommender import Recommender
 from test_util import load_test_interactions, add_rmse_to_file
 from trainer import AlgoTrainer
 
@@ -37,16 +37,16 @@ def main():
         parsed_data = Parser.parse(interactions, earlier_than=earlier_than)
 
         before = datetime.now()
-        predictions = AlgoTrainer.train(parsed_data.train_set,
-                                        parsed_data.test_set,
-                                        knn)
+        predictions = AlgoTrainer.calc_predictions(parsed_data.train_set,
+                                                   parsed_data.test_set,
+                                                   knn)
         time_elapsed = (datetime.now() - before).total_seconds()
 
         recommender = Recommender(parsed_data.ids_offers_map, predictions)
 
         rmse = recommender.calc_rmse()
         add_rmse_to_file(rmse,
-                         'rmse_timestep.json',
+                         'rmse_time_step.json',
                          ('earlier_than', earlier_than),
                          ('time_elapsed', time_elapsed))
 
