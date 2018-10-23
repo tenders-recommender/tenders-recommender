@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 from typing import List, Optional, Dict, Union
 
 from flask import Flask
@@ -7,35 +6,41 @@ from flask import jsonify
 from flask import request
 from flask_cors import CORS
 
-from recommender_surprise.dto import Recommendation
-from recommender_surprise.service import Recommender
+from tenders_recommender.dto import Interaction, Recommendation
+from tenders_recommender.service import RecommenderService
 
-
-print('STARTING RECOMMENDATION SYSTEM')
-before: datetime = datetime.now()
+# json arrays are packed in object so it is safe
+# against redefining js Array constructor exploit
 
 app: Flask = Flask(__name__)
 CORS(app)
-recommender: Recommender = Recommender()
+recommender_service: RecommenderService = RecommenderService(cache_size=50)
 
-print('READY')
-print('TIME ELAPSED: ' + str((datetime.now() - before).total_seconds()))
+
+@app.route('/populate_interactions', method='POST')
+def populate_interactions():
+    interactions: Optional[List[Interaction]] = request.get_json()
+    if interactions:
+        recommender_service.populate_interactions(interactions)
+
+
+@app.route('/train_algorithm')
+def train_algorithm():
+    recommender_service.train_algorithm()
 
 
 @app.route('/rmse')
 def get_rmse():
-    return jsonify(recommender.calculate_rmse())
+    return jsonify(recommender_service.get_rmse())
 
 
 @app.route('/recommendations/<int:user_id>')
 def get_recommendations(user_id: int):
     top: Optional[int] = request.args.get('top', type=int)
-    recommendations: List[Recommendation] = recommender.get_recommendations(user_id, top_n=top) \
+    recommendations: List[Recommendation] = recommender_service.get_recommendations(user_id, top_n=top) \
         if top \
-        else recommender.get_recommendations(user_id)
+        else recommender_service.get_recommendations(user_id)
 
-    # json array packed in object so it is safe
-    # against redefining js Array constructor exploit
     return jsonify({'data': [r.__dict__ for r in recommendations]})
 
 
@@ -62,4 +67,5 @@ def get_param_comparison():
 
 
 if __name__ == '__main__':
+    print('Started Tenders Recommender API')
     app.run()
