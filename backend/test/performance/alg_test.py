@@ -5,11 +5,11 @@ from typing import List
 import numpy as np
 from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
 
-from dto import Interaction, ParsedData
-from parser import Parser
-from recommender import Recommender
-from test_util import load_test_interactions, add_rmse_to_file
-from trainer import AlgoTrainer
+from tenders_recommender.dto import Interaction, ParsedData
+from tenders_recommender.parser import Parser
+from tenders_recommender.recommender import Recommender
+from tenders_recommender.trainer import AlgoTrainer
+from test.test_util import load_sorted_test_interactions, add_rmse_to_file
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     random.seed(seed)
     np.random.seed(seed)
 
-    interactions: List[Interaction] = load_test_interactions()
+    interactions: List[Interaction] = load_sorted_test_interactions()
     parsed_data: ParsedData = Parser.parse(interactions)
 
     for test_number in range(1, 4):

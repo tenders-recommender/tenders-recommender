@@ -4,10 +4,10 @@ from datetime import datetime
 import numpy as np
 from surprise import KNNBasic
 
-from parser import Parser
-from recommender import Recommender
-from test_util import load_test_interactions, add_rmse_to_file
-from trainer import AlgoTrainer
+from tenders_recommender.parser import Parser
+from tenders_recommender.recommender import Recommender
+from tenders_recommender.trainer import AlgoTrainer
+from test.test_util import load_sorted_test_interactions, add_rmse_to_file
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
     name_range = ['cosine', 'msd', 'pearson', 'pearson_baseline']
     min_support_range = [1, 2, 3]
 
-    interactions = load_test_interactions()
+    interactions = load_sorted_test_interactions()
     parsed_data = Parser.parse(interactions)
 
     for k in k_range:

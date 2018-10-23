@@ -2,7 +2,7 @@ from typing import NamedTuple, Dict
 
 from surprise import Trainset
 
-from dto.types import Testset
+from .types import Testset
 
 
 class ParsedData(NamedTuple):

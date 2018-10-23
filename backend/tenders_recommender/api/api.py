@@ -6,8 +6,8 @@ from flask import jsonify
 from flask import request
 from flask_cors import CORS
 
-from dto import Interaction, Recommendation
-from service import RecommenderService
+from tenders_recommender.dto import Interaction, Recommendation
+from tenders_recommender.service import RecommenderService
 
 # json arrays are packed in object so it is safe
 # against redefining js Array constructor exploit

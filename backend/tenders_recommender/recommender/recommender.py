@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from surprise import Prediction, accuracy
 
-from dto import Recommendation
+from tenders_recommender.dto import Recommendation
 
 
 class Recommender(object):

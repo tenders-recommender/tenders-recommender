@@ -4,10 +4,10 @@ from typing import List
 from cachetools import LRUCache, cachedmethod
 from surprise import KNNBasic, Prediction, AlgoBase
 
-from dto import Recommendation, Interaction, ParsedData
-from parser import Parser
-from recommender import Recommender
-from trainer import AlgoTrainer
+from tenders_recommender.dto import Recommendation, Interaction, ParsedData
+from tenders_recommender.parser import Parser
+from tenders_recommender.recommender import Recommender
+from tenders_recommender.trainer import AlgoTrainer
 
 
 class RecommenderService(object):
@@ -40,7 +40,6 @@ class RecommenderService(object):
         all_predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
                                                                          parsed_data.test_set,
                                                                          algorithm)
-
         self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
         self.cache.clear()
 
