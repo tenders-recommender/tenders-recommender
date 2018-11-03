@@ -1,3 +1,3 @@
-export interface ApiData {
-  data?: Array<Object>;
+export interface ApiData<T> {
+  readonly data?: T;
 }
