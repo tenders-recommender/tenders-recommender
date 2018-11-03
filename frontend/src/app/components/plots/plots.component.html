@@ -1,0 +1,19 @@
+<mat-toolbar style="height: 5vh;">
+  <span class="toolbar-flex"></span>
+
+  <nav mat-tab-nav-bar color="accent">
+    <a mat-tab-link
+       *ngFor="let link of navLinks"
+       [routerLink]="link.path"
+       routerLinkActive #rla="routerLinkActive"
+       [active]="rla.isActive">
+      {{link.label}}
+    </a>
+  </nav>
+
+  <span class="toolbar-flex"> </span>
+</mat-toolbar>
+
+<div class="mat-elevation-z10" style="max-height: 80vh; margin-left: 2%; margin-right: 2%; text-align: center">
+  <router-outlet></router-outlet>
+</div>

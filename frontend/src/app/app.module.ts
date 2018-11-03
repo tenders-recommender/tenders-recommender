@@ -1,30 +1,61 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import {
+  MatButtonModule,
+  MatCardModule,
+  MatDividerModule,
+  MatFormFieldModule,
+  MatIconModule,
+  MatInputModule,
+  MatPaginatorModule,
+  MatTableModule,
+  MatTabsModule,
+  MatToolbarModule
+} from '@angular/material';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { AppComponent } from './app.component';
-import { RecommendationsComponent } from './recommendations/recommendations.component';
-import { RmseComponent } from './rmse/rmse.component';
 import { AppRoutingModule } from './app-routing.module';
-import {AlgorithmsComponent} from "./algorithms/algorithms.component";
-import {ParamsComponent} from "./params/params.component";
+import { AppComponent } from './app.component';
+import { HomeComponent } from './components/home/home.component';
+import { PlotsComponent } from './components/plots/plots.component';
+import { RecommendationsComponent } from './components/recommendations/recommendations.component';
+import { AlgorithmsComparisonPlotComponent } from './components/plots/algorithms-comparison-plot/algorithms-comparison-plot.component';
+import { ParametersComparisonPlotComponent } from './components/plots/parameters-comparison-plot/parameters-comparison-plot.component';
+import { TimeStepPlotComponent } from './components/plots/time-step-plot/time-step-plot.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+    HomeComponent,
+    PlotsComponent,
     RecommendationsComponent,
-    RmseComponent,
-    AlgorithmsComponent,
-    ParamsComponent
+    AlgorithmsComparisonPlotComponent,
+    ParametersComparisonPlotComponent,
+    TimeStepPlotComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
+    AppRoutingModule,
     HttpClientModule,
-    AppRoutingModule
+    BrowserAnimationsModule,
+    FormsModule,
+    MatToolbarModule,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatIconModule,
+    MatCardModule,
+    MatTableModule,
+    MatPaginatorModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [
+    AppComponent
+  ]
 })
-export class AppModule { }
+export class AppModule {
+}
