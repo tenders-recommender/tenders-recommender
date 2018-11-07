@@ -8,7 +8,7 @@ from typing import List
 
 from tenders_recommender.dto import Recommendation
 
-TRACKER_FILE_FOLDER: str = os.path.join('..', '..', '..', 'tracker')
+DATA_FILE_FOLDER: str = os.path.join('..', '..', '..', 'plots', 'data')
 
 
 def save_to_file(object_to_save: object, file_path: str) -> None:
@@ -29,7 +29,7 @@ def load_from_file(file_path: str) -> object:
 
 
 def add_descriptions_to_offers(recommendations: List[Recommendation]):
-    file_path = os.path.join(TRACKER_FILE_FOLDER, 'description.json')
+    file_path = os.path.join(DATA_FILE_FOLDER, 'description.json')
     recommendations_with_desc: List[Recommendation] = []
     with open(file_path) as file:
         descriptions = json.load(file)
