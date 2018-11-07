@@ -8,6 +8,7 @@ from flask_cors import CORS
 
 from tenders_recommender.dto import Interaction, Recommendation
 from tenders_recommender.service import RecommenderService
+from tenders_recommender.util import add_descriptions_to_offers
 
 # json arrays are packed in object so it is safe
 # against redefining js Array constructor exploit
@@ -44,7 +45,7 @@ def get_recommendations(user_id: int):
     recommendations: List[Recommendation] = recommender_service.get_recommendations(user_id, top_n=top) \
         if top \
         else recommender_service.get_recommendations(user_id)
-
+    recommendations = add_descriptions_to_offers(recommendations)
     return jsonify({'data': [r._asdict() for r in recommendations]})
 
 

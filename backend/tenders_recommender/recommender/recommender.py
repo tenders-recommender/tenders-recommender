@@ -19,7 +19,7 @@ class Recommender(object):
 
         for user_id, offer_id, true_rating, estimation, _ in self.__all_predictions:
             if given_user_id == user_id:
-                recommendations.append(Recommendation(self.__ids_offers_map[offer_id], estimation))
+                recommendations.append(Recommendation(self.__ids_offers_map[offer_id], estimation, '-'))
 
         recommendations.sort(key=lambda recommendation: recommendation.estimation, reverse=True)
         return recommendations
