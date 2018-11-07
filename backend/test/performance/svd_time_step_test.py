@@ -1,10 +1,10 @@
 import random
 from datetime import datetime, timedelta
-from typing import List, Tuple, Callable
+from typing import List, Callable
 
 import dateutil
 import numpy as np
-from surprise import KNNBasic, SVD
+from surprise import SVD
 
 from tenders_recommender.dto import Interaction
 from tenders_recommender.parser import Parser
@@ -17,14 +17,6 @@ def main():
     seed = 0
     random.seed(seed)
     np.random.seed(seed)
-
-    k = 45
-    min_k = 1
-    sim_options = {
-        'name': 'pearson',
-        'min_support': 1,
-        'user_based': True
-    }
 
     all_interactions = load_sorted_test_interactions()
     print('Amount of interactions: ' + str(len(all_interactions)))
@@ -47,19 +39,29 @@ def main():
         filtered_interactions = all_interactions[0:interactions_slice_index:1]
 
         parsed_data = Parser.parse(filtered_interactions)
-        knn = KNNBasic(k=k, min_k=min_k, sim_options=sim_options)
+        svd = SVD(
+            n_factors=50,
+            n_epochs=50,
+            biased=True,
+            init_mean=0,
+            init_std_dev=0,
+            lr_all=0.01,
+            reg_all=0.01,
+            random_state=None,
+            verbose=True
+        )
 
         before = datetime.now()
         predictions = AlgoTrainer.calc_predictions(parsed_data.train_set,
                                                    parsed_data.test_set,
-                                                   knn)
+                                                   svd)
         time_elapsed = (datetime.now() - before).total_seconds()
 
         recommender = Recommender(parsed_data.ids_offers_map, predictions)
 
         rmse = recommender.calc_rmse()
         add_rmse_to_file(rmse,
-                         'rmse_time_step.json',
+                         'rmse_svd_time_step.json',
                          ('earlier_than', earlier_than.timestamp()),
                          ('time_elapsed', time_elapsed),
                          ('interactions', len(filtered_interactions)))

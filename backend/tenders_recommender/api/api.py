@@ -17,16 +17,20 @@ CORS(app)
 recommender_service: RecommenderService = RecommenderService(cache_size=50)
 
 
-@app.route('/populate_interactions', method='POST')
+@app.route('/populate_interactions', methods=['POST'])
 def populate_interactions():
     interactions: Optional[List[Interaction]] = request.get_json()
+
     if interactions:
         recommender_service.populate_interactions(interactions)
+
+    return jsonify(True)
 
 
 @app.route('/train_algorithm')
 def train_algorithm():
     recommender_service.train_algorithm()
+    return jsonify(True)
 
 
 @app.route('/rmse')
@@ -41,7 +45,7 @@ def get_recommendations(user_id: int):
         if top \
         else recommender_service.get_recommendations(user_id)
 
-    return jsonify({'data': [r.__dict__ for r in recommendations]})
+    return jsonify({'data': [r._asdict() for r in recommendations]})
 
 
 @app.route('/rmse/summary')
@@ -60,7 +64,7 @@ def get_alg_comparison():
 
 @app.route('/param/comparison')
 def get_param_comparison():
-    with open('plots/data/rmse_params.json', 'r') as f:
+    with open('plots/data/rmse_knn_params.json', 'r') as f:
         t = Dict[str, Union[str, int, bool]]
         data: Dict[str, Union[str, int, float, t]] = json.load(f)
     return jsonify({'data': data})

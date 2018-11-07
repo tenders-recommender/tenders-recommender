@@ -2,7 +2,7 @@ import operator
 from typing import List
 
 from cachetools import LRUCache, cachedmethod
-from surprise import KNNBasic, Prediction, AlgoBase
+from surprise import Prediction, AlgoBase, SVD
 
 from tenders_recommender.dto import Recommendation, Interaction, ParsedData
 from tenders_recommender.parser import Parser
@@ -27,14 +27,14 @@ class RecommenderService(object):
 
         parsed_data: ParsedData = Parser.parse(interactions)
 
-        algorithm: AlgoBase = KNNBasic(
-            k=45,
-            min_k=1,
-            sim_options={
-                'name': 'pearson',
-                'min_support': 1,
-                'user_based': True
-            }
+        algorithm: AlgoBase = SVD(
+            n_factors=50,
+            n_epochs=50,
+            biased=True,
+            init_mean=0,
+            init_std_dev=0,
+            lr_all=0.01,
+            reg_all=0.01,
         )
 
         all_predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,

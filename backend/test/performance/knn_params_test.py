@@ -46,7 +46,7 @@ def main():
                         recommender = Recommender(parsed_data.ids_offers_map, predictions)
 
                         add_rmse_to_file(recommender.calc_rmse(),
-                                         'rmse_params.json',
+                                         'rmse_knn_params.json',
                                          ('alg_name', KNNBasic.__name__),
                                          ('time_elapsed', time_elapsed),
                                          ('k', k),

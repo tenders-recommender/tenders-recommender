@@ -1,0 +1,51 @@
+sudo: required
+dist: trusty
+
+matrix:
+  include:
+  - language: python
+    python:
+      - 3.7
+
+    cache:
+      directories:
+        - $HOME/backend/.pip-cache/
+
+    install:
+      - pip install -r requirements.txt
+
+    script:
+      - python backend/app/main.py >> log.txt 2>&1  &
+      - python backend/app/main.py > /dev/null &
+      - py.test --cov ../  ./backend/app/tests/test_api.py
+
+    after_success:
+      - bash <(curl -s https://codecov.io/bash)
+
+  - language: node_js
+    node_js:
+      - "6"
+
+    addons:
+      chrome: stable
+
+    cache:
+      directories:
+        - $HOME/frontend/.npm
+
+    env:
+      global:
+      # See https://git.io/vdao3 for details.
+      - JOBS=1
+
+    before_install:
+      - cd frontend
+      - npm install
+      - npm install -g ember-cli
+      - npm i eslint-plugin-ember@latest --save-dev
+      - npm config set spin false
+
+
+    script:
+      - npm run lint:js
+      - npm test

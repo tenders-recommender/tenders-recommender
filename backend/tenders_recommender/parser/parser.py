@@ -33,10 +33,10 @@ class Parser(object):
         offers_ids_map: Dict[str, int] = {offer_name: (index + 1) for index, offer_name in enumerate(offers_set)}
 
         data_frame: DataFrame = Parser.__create_data_frame(offers_ids_map, all_interactions, score_map)
-        train_set, test_set = Parser.__create_data_sets(data_frame, rating_scale)
+        whole_data_set, train_set, test_set = Parser.__create_data_sets(data_frame, rating_scale)
         ids_offers_map: Dict[int, str] = {value: key for key, value in offers_ids_map.items()}
 
-        return ParsedData(ids_offers_map, train_set=train_set, test_set=test_set)
+        return ParsedData(ids_offers_map, whole_data_set=whole_data_set, train_set=train_set, test_set=test_set)
 
     @staticmethod
     def __create_data_frame(offers_ids_map: Dict[str, int],
@@ -61,12 +61,12 @@ class Parser(object):
 
     @staticmethod
     def __create_data_sets(data_frame: DataFrame,
-                           rating_scale: Tuple[float, float]) -> Tuple[Trainset, Testset]:
+                           rating_scale: Tuple[float, float]) -> Tuple[DatasetAutoFolds, Trainset, Testset]:
         reader: Reader = Reader(rating_scale=rating_scale)
 
-        prepared_data: DatasetAutoFolds = Dataset.load_from_df(
+        whole_data_set: DatasetAutoFolds = Dataset.load_from_df(
             data_frame[[USER_ID, OFFER_ID, SCORE]], reader)
 
-        train_set: Trainset = prepared_data.build_full_trainset()
+        train_set: Trainset = whole_data_set.build_full_trainset()
         test_set: Testset = train_set.build_testset()
-        return train_set, test_set
+        return whole_data_set, train_set, test_set

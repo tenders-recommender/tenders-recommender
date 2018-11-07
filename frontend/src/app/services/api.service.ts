@@ -19,8 +19,8 @@ export class ApiService {
 
   private readonly plotsDataRepositoryUrl = 'https://raw.githubusercontent.com/tenders-recommender/tenders-recommender/master/plots/data/';
   private readonly algorithmsComparisonDataUrl = this.plotsDataRepositoryUrl + 'rmse_alg.json';
-  private readonly parametersComparisonDataUrl = this.plotsDataRepositoryUrl + 'rmse_params.json';
-  private readonly timeStepDataUrl = this.plotsDataRepositoryUrl + 'rmse_time_step.json';
+  private readonly knnParametersComparisonDataUrl = this.plotsDataRepositoryUrl + 'rmse_knn_params.json';
+  private readonly knnTimeStepDataUrl = this.plotsDataRepositoryUrl + 'rmse_knn_time_step.json';
 
   constructor(private http: HttpClient) {
   }
@@ -62,12 +62,12 @@ export class ApiService {
   }
 
   public getParametersComparisonData(): Promise<ReadonlyArray<ParametersComparisonData>> {
-    return this.http.get<ReadonlyArray<ParametersComparisonData>>(this.parametersComparisonDataUrl)
+    return this.http.get<ReadonlyArray<ParametersComparisonData>>(this.knnParametersComparisonDataUrl)
       .toPromise();
   }
 
   public getTimeStepData(): Promise<ReadonlyArray<TimeStepData>> {
-    return this.http.get<ReadonlyArray<TimeStepData>>(this.timeStepDataUrl)
+    return this.http.get<ReadonlyArray<TimeStepData>>(this.knnTimeStepDataUrl)
       .toPromise();
   }
 }

@@ -5,6 +5,7 @@ from itertools import chain
 from typing import Tuple, List, Dict, Callable
 
 import dateutil
+import numpy as np
 
 from tenders_recommender.dto import Interaction
 
@@ -15,6 +16,14 @@ INTERACTIONS_FILE_NAMES: List[str] = [
     'reported-offers.json',
     'viewed-offers.json'
 ]
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+
+        return json.JSONEncoder.default(self, obj)
 
 
 def load_sorted_test_interactions() -> List[Interaction]:
@@ -51,7 +60,7 @@ def add_rmse_to_file(rmse: float,
         json.dump(entries, rmse_file)
 
 
-def create_file_path(file_name) -> str:
+def create_file_path(file_name: str) -> str:
     return os.path.join(SAVED_FOLDER, file_name) \
         if file_name is not None \
         else None
