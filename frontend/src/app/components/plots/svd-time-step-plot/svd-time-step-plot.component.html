@@ -1,0 +1,24 @@
+<div style="max-height: 80vh;">
+  <button *ngIf="currentPlotType !== undefined"
+          class="mat-elevation-z5"
+          mat-button
+          (click)="changePlot()"
+          color="primary"
+          style="width: 15%; max-height: 5vh">
+    {{ currentPlotType.toString() }}
+  </button>
+
+  <div style="max-height: 100%;">
+    <div [hidden]="currentPlotType !== PlotType.TIMESTAMP" style="max-height: 100%;">
+      <canvas id="svdTimestampPlot" style="max-height: 75vh;">
+        <!-- Place for injected plot -->
+      </canvas>
+    </div>
+
+    <div [hidden]="currentPlotType !== PlotType.INTERACTIONS" style="max-height: 100%;">
+      <canvas id="svdInteractionsPlot" style="max-height: 75vh;">
+        <!-- Place for injected plot -->
+      </canvas>
+    </div>
+  </div>
+</div>

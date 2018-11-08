@@ -68,5 +68,5 @@ class Parser(object):
             data_frame[[USER_ID, OFFER_ID, SCORE]], reader)
 
         train_set: Trainset = whole_data_set.build_full_trainset()
-        test_set: Testset = train_set.build_testset()
+        test_set: Testset = train_set.build_anti_testset()
         return whole_data_set, train_set, test_set
