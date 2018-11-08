@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TimeStepPlotComponent } from './time-step-plot.component';
+import { KnnTimeStepPlotComponent } from './knn-time-step-plot.component';
 
-describe('TimeStepPlotComponent', () => {
-  let component: TimeStepPlotComponent;
-  let fixture: ComponentFixture<TimeStepPlotComponent>;
+describe('KnnTimeStepPlotComponent', () => {
+  let component: KnnTimeStepPlotComponent;
+  let fixture: ComponentFixture<KnnTimeStepPlotComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TimeStepPlotComponent ]
+      declarations: [ KnnTimeStepPlotComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TimeStepPlotComponent);
+    fixture = TestBed.createComponent(KnnTimeStepPlotComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

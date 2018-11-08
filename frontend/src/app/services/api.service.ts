@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AlgorithmsComparisonData } from '../model/plots/algorithms-comparison-data';
 import { ApiArrayData } from '../model/api-array-data';
 import { Interaction } from '../model/interaction';
-import { ParametersComparisonData } from '../model/plots/parameters-comparison-data';
-import { Recommendation } from '../model/recommendation';
+import { AlgorithmsComparisonData } from '../model/plots/algorithms-comparison-data';
+import { KnnParametersComparisonData } from '../model/plots/knn-parameters-comparison-data';
+import { SvdParametersComparisonData } from '../model/plots/svd-parameters-comparison-data';
 import { TimeStepData } from '../model/plots/time-step-data';
+import { Recommendation } from '../model/recommendation';
 
 @Injectable({
   providedIn: 'root'
@@ -19,13 +20,16 @@ export class ApiService {
 
   private readonly plotsDataRepositoryUrl = 'https://raw.githubusercontent.com/tenders-recommender/tenders-recommender/master/plots/data/';
   private readonly algorithmsComparisonDataUrl = this.plotsDataRepositoryUrl + 'rmse_alg.json';
+
   private readonly knnParametersComparisonDataUrl = this.plotsDataRepositoryUrl + 'rmse_knn_params.json';
   private readonly knnTimeStepDataUrl = this.plotsDataRepositoryUrl + 'rmse_knn_time_step.json';
+  private readonly svdParametersComparisonDataUrl = this.plotsDataRepositoryUrl + 'rmse_svd_params.json';
+  private readonly svdTimeStepDataUrl = this.plotsDataRepositoryUrl + 'rmse_svd_time_step.json';
 
   constructor(private http: HttpClient) {
   }
 
-  public populateInteractions(interactions: Array<Interaction>): Promise<boolean> {
+  public populateInteractions(interactions: ReadonlyArray<Interaction>): Promise<boolean> {
     return this.http.post(this.populateInteractionsUrl, interactions)
       .toPromise()
       .then(() => true, () => false);
@@ -61,13 +65,23 @@ export class ApiService {
       .toPromise();
   }
 
-  public getParametersComparisonData(): Promise<ReadonlyArray<ParametersComparisonData>> {
-    return this.http.get<ReadonlyArray<ParametersComparisonData>>(this.knnParametersComparisonDataUrl)
+  public getKnnParametersComparisonData(): Promise<ReadonlyArray<KnnParametersComparisonData>> {
+    return this.http.get<ReadonlyArray<KnnParametersComparisonData>>(this.knnParametersComparisonDataUrl)
       .toPromise();
   }
 
-  public getTimeStepData(): Promise<ReadonlyArray<TimeStepData>> {
+  public getKnnTimeStepData(): Promise<ReadonlyArray<TimeStepData>> {
     return this.http.get<ReadonlyArray<TimeStepData>>(this.knnTimeStepDataUrl)
+      .toPromise();
+  }
+
+  public getSvdParametersComparisonData(): Promise<SvdParametersComparisonData> {
+    return this.http.get<SvdParametersComparisonData>(this.svdParametersComparisonDataUrl)
+      .toPromise();
+  }
+
+  public getSvdTimeStepData(): Promise<ReadonlyArray<TimeStepData>> {
+    return this.http.get<ReadonlyArray<TimeStepData>>(this.svdTimeStepDataUrl)
       .toPromise();
   }
 }

@@ -1,25 +1,25 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 import * as Chart from 'chart.js';
-import { ParametersComparisonData } from '../../../model/plots/parameters-comparison-data';
+import { KnnParametersComparisonData } from '../../../model/plots/knn-parameters-comparison-data';
 import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-parameters-comparison-plot',
-  templateUrl: './parameters-comparison-plot.component.html',
-  styleUrls: ['./parameters-comparison-plot.component.scss']
+  templateUrl: './knn-parameters-comparison-plot.component.html',
+  styleUrls: ['./knn-parameters-comparison-plot.component.scss']
 })
-export class ParametersComparisonPlotComponent implements OnInit {
+export class KnnParametersComparisonPlotComponent implements OnInit {
 
   constructor(private readonly apiService: ApiService,
               private readonly elementRef: ElementRef) {
   }
 
   ngOnInit() {
-    this.apiService.getParametersComparisonData()
+    this.apiService.getKnnParametersComparisonData()
       .then(parametersComparisonData => this.createPlot(parametersComparisonData));
   }
 
-  private createPlot(paramsData: ReadonlyArray<ParametersComparisonData>) {
+  private createPlot(paramsData: ReadonlyArray<KnnParametersComparisonData>) {
     const dataSet = paramsData.map(param => {
       return {
         'x': param.time_elapsed,
@@ -37,13 +37,9 @@ export class ParametersComparisonPlotComponent implements OnInit {
       ];
     });
 
-    console.log(this);
-    console.log(this.elementRef);
-    console.log(this.elementRef.nativeElement);
     const ctx = this.elementRef.nativeElement
-      .querySelector('#paramsPlot')
+      .querySelector('#knnParamsPlot')
       .getContext('2d');
-
 
     const chartData = {
       labels: tooltips,

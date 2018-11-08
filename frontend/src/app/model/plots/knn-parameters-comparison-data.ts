@@ -1,4 +1,4 @@
-export interface ParametersComparisonData {
+export interface KnnParametersComparisonData {
   readonly rmse: number;
   readonly algorithm: string;
   readonly time_elapsed: number;

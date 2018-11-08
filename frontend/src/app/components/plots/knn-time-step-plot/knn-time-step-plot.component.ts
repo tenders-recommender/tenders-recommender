@@ -11,10 +11,10 @@ enum PlotType {
 
 @Component({
   selector: 'app-time-step-plot',
-  templateUrl: './time-step-plot.component.html',
-  styleUrls: ['./time-step-plot.component.scss']
+  templateUrl: './knn-time-step-plot.component.html',
+  styleUrls: ['./knn-time-step-plot.component.scss']
 })
-export class TimeStepPlotComponent implements OnInit {
+export class KnnTimeStepPlotComponent implements OnInit {
 
   public PlotType = PlotType;
 
@@ -28,7 +28,7 @@ export class TimeStepPlotComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.apiService.getTimeStepData()
+    this.apiService.getKnnTimeStepData()
       .then(timeStepData => this.parsePoints(timeStepData))
       .then(() => this.createBothPlots())
       .then(() => this.currentPlotType = PlotType.TIMESTAMP);
@@ -37,10 +37,8 @@ export class TimeStepPlotComponent implements OnInit {
   public changePlot() {
     if (this.currentPlotType === PlotType.TIMESTAMP) {
       this.currentPlotType = PlotType.INTERACTIONS;
-      this.createInteractionsPlot();
     } else {
       this.currentPlotType = PlotType.TIMESTAMP;
-      this.createTimestampPlot();
     }
   }
 
@@ -67,7 +65,7 @@ export class TimeStepPlotComponent implements OnInit {
   }
 
   private createTimestampPlot() {
-    this.createPlot('#timestampPlot',
+    this.createPlot('#knnTimestampPlot',
       {
         label: 'RMSE',
         xAxisID: 'timestamp',
@@ -92,7 +90,7 @@ export class TimeStepPlotComponent implements OnInit {
   }
 
   private createInteractionsPlot() {
-    this.createPlot('#interactionsPlot',
+    this.createPlot('#knnInteractionsPlot',
       {
         label: 'RMSE',
         xAxisID: 'interactions',

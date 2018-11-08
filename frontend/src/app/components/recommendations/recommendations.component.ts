@@ -10,9 +10,9 @@ import { ApiService } from '../../services/api.service';
 })
 export class RecommendationsComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  userID: number;
-  topN: number;
-  dataSource: MatTableDataSource<Recommendation>;
+  public userID: number;
+  public topN: number;
+  public dataSource: MatTableDataSource<Recommendation>;
 
   constructor(private readonly apiService: ApiService) {
   }
@@ -28,7 +28,6 @@ export class RecommendationsComponent implements OnInit {
       : this.apiService.getRecommendations(this.userID);
 
     recommendationsPromise.then(recommendations => {
-      console.log(recommendations);
       this.dataSource.data = [...recommendations];
     });
   }
