@@ -1,51 +1,39 @@
 sudo: required
 dist: trusty
-
 matrix:
   include:
+
   - language: python
     python:
-      - 3.7
-
+    - 3.7
     cache:
       directories:
-        - $HOME/backend/.pip-cache/
-
+      - "$HOME/backend/.pip-cache/"
+    before_install:
+    - cd backend
     install:
-      - pip install -r requirements.txt
-
-    script:
-      - python backend/app/main.py >> log.txt 2>&1  &
-      - python backend/app/main.py > /dev/null &
-      - py.test --cov ../  ./backend/app/tests/test_api.py
-
-    after_success:
-      - bash <(curl -s https://codecov.io/bash)
+    - pip install -r requirements.txt
 
   - language: node_js
     node_js:
-      - "6"
-
+    - '10'
     addons:
       chrome: stable
-
     cache:
       directories:
-        - $HOME/frontend/.npm
-
+      - "$HOME/frontend/.npm"
     env:
       global:
-      # See https://git.io/vdao3 for details.
       - JOBS=1
-
     before_install:
-      - cd frontend
-      - npm install
-      - npm install -g ember-cli
-      - npm i eslint-plugin-ember@latest --save-dev
-      - npm config set spin false
-
-
+    - cd frontend
+    install:
+    - npm install
+    - ng build --prod --base-href "https://tenders-recommender.github.io/"
     script:
-      - npm run lint:js
-      - npm test
+    - ng lint
+    - npx ngh --repo=https://GH_TOKEN@github.com/tenders-recommender/tenders-recommender.github.io.git
+      --branch=master --dir=dist/tenders-recommender
+env:
+  global:
+    secure: rMflPsCP5OyUnCE0ZQHbZfXpizDOjbeK9wlQ9BDzr7Avjs2u2nywczzWMvdZ6jPMBA3sV9PWV+p2b/6PDKEC/EJTBP4WGDurzT0nxpeOKgfElBX7K5E4EfcYy1kAEX/VrE/31GAqYo9fk21HSJxR/FtGQnJe/Ucqjl4mERsQhpPVYvmhshbjx7WQG/PdBFbSZ7SneinWrRRlUFVWkPhmGYd/0aSnyLXsjNL7lrk6vFYmBU8/XgUF5M27JYemia2N/nyr9XqJMtqoEosTrqNeqpp/3QmM17c4nv9gmJEYwFznHtslRqFd6OHT53yudyEm+Kr1na8w8VS1pl9tg80fJxZm6RDov9vWUM7XjgnoQW7yemmyGa1LOAqFQLBeA/OWMt7+mT/9AUgYy5JxJpHFNN65ZUzD7yrqo5y2Z2Ucp6EXNXLrqJavffpykr508she4yozCQOfce6TkWp5v5GMvfj6VI/MFzjuA37EGQSHvye+9AM9Tbr7tejAsX+DEISC+tahOFIUFKA3Fgp1YS5mmW/dxdvG9WkhBIgRFemuq7gjI+RMp59dg0aTUPeXen6/jQA8lRgdDk1d0tw4+LrgWejoRvX0fcz4lhg3SXJU5fg11H5dwNaZDC6zZ9xQSdHqMCJSByiTVGKY+TXf8Jw9m30wEpJvE8ByEm6bjTfJwGg=

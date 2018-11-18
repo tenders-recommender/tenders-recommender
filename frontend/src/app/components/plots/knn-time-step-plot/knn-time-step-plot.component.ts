@@ -17,11 +17,10 @@ enum PlotType {
 export class KnnTimeStepPlotComponent implements OnInit {
 
   public PlotType = PlotType;
+  public currentPlotType: PlotType;
 
   private timestampPoints: ChartPoint[];
   private interactionsPoints: ChartPoint[];
-
-  private currentPlotType: PlotType;
 
   constructor(private readonly apiService: ApiService,
               private readonly elementRef: ElementRef) {
