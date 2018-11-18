@@ -27,11 +27,13 @@ matrix:
       - JOBS=1
     before_install:
     - cd frontend
+    - ng lint
     install:
+    - pwd
     - npm install
     - ng build --prod --base-href "https://tenders-recommender.github.io/"
     script:
-    - ng lint
+    - pwd
     - npx ngh --repo=https://GH_TOKEN@github.com/tenders-recommender/tenders-recommender.github.io.git
       --branch=master --dir=dist/tenders-recommender
 env:
