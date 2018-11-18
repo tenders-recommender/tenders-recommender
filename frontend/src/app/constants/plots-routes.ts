@@ -1,8 +1,12 @@
 import { Routes } from '@angular/router';
 import { AlgorithmsComparisonPlotComponent } from '../components/plots/algorithms-comparison-plot/algorithms-comparison-plot.component';
-import { KnnParametersComparisonPlotComponent } from '../components/plots/knn-parameters-comparison-plot/knn-parameters-comparison-plot.component';
+import {
+  KnnParametersComparisonPlotComponent
+} from '../components/plots/knn-parameters-comparison-plot/knn-parameters-comparison-plot.component';
 import { KnnTimeStepPlotComponent } from '../components/plots/knn-time-step-plot/knn-time-step-plot.component';
-import { SvdParametersComparisonPlotComponent } from '../components/plots/svd-parameters-comparison-plot/svd-parameters-comparison-plot.component';
+import {
+  SvdParametersComparisonPlotComponent
+} from '../components/plots/svd-parameters-comparison-plot/svd-parameters-comparison-plot.component';
 import { SvdTimeStepPlotComponent } from '../components/plots/svd-time-step-plot/svd-time-step-plot.component';
 import { NavLink } from '../model/routing/nav-link';
 
