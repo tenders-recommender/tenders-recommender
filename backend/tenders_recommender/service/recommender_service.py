@@ -4,6 +4,8 @@ from typing import List
 from cachetools import LRUCache, cachedmethod
 from surprise import Prediction, AlgoBase, SVD
 
+from tenders_recommender.dao.user_interactions import UsersInteractions
+from tenders_recommender.database.database_manager import DatabaseManager
 from tenders_recommender.dto import Recommendation, Interaction, ParsedData
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
@@ -14,16 +16,17 @@ class RecommenderService(object):
 
     def __init__(self, cache_size: int):
         self.cache = LRUCache(maxsize=cache_size)
-        self.__interactions: List[Interaction] = []
         self.__recommender: Recommender = None
+        self.database_manager = DatabaseManager()
 
     def populate_interactions(self, new_interactions: List[Interaction]):
-        self.__interactions.extend(new_interactions)
+        self.database_manager.insert_users_interactions(UsersInteractions(new_interactions))
 
-    def train_algorithm(self, interactions: List[Interaction] = None):
-        if not interactions:
-            interactions = self.__interactions.copy()
-        self.__interactions.clear()
+    def train_algorithm(self):
+        interactions: List[Interaction] = []
+        all_interactions = self.database_manager.query_all_user_interactions()
+        for interaction in all_interactions:
+            interactions.extend(interaction.users_interactions)
 
         parsed_data: ParsedData = Parser.parse(interactions)
 
