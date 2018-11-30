@@ -9,8 +9,8 @@ import numpy as np
 
 from tenders_recommender.dto import Interaction
 
-SAVED_FOLDER: str = os.path.join('..', '..', '..', 'saved')
-TRACKER_FILE_FOLDER: str = os.path.join('..', '..', '..', 'tracker')
+SAVED_FOLDER: str = os.path.join('..', '..', '..', 'plots', 'data')
+TRACKER_FILE_FOLDER: str = os.path.join('..', '..', '..', '..', 'tracker')
 INTERACTIONS_FILE_NAMES: List[str] = [
     'observed-offers.json',
     'reported-offers.json',

@@ -5,11 +5,12 @@ from typing import List
 import numpy as np
 from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
 
+from benchmarks.test_util import load_sorted_test_interactions, add_rmse_to_file
 from tenders_recommender.dto import Interaction, ParsedData
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer
-from test.test_util import load_sorted_test_interactions, add_rmse_to_file
+from surprise.model_selection import KFold
 
 
 def main():
@@ -21,14 +22,15 @@ def main():
 
     interactions: List[Interaction] = load_sorted_test_interactions()
     parsed_data: ParsedData = Parser.parse(interactions)
+    kf = KFold(n_splits=3)
 
-    for test_number in range(1, 4):
+    for trainset, testset in kf.split(parsed_data.whole_data_set):
         for alg_to_test in alg_list:
-            print("TESTING ALGORITHM: " + alg_to_test.__name__ + ", TIME: " + str(test_number))
+            print("TESTING ALGORITHM: " + alg_to_test.__name__ + ", TIME: ")
             try:
                 before = datetime.now()
-                predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
-                                                                             parsed_data.test_set,
+                predictions: List[Prediction] = AlgoTrainer.calc_predictions(trainset,
+                                                                             testset,
                                                                              alg_to_test())
                 time_elapsed = (datetime.now() - before).total_seconds()
 
