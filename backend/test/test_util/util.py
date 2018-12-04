@@ -4,7 +4,7 @@ from datetime import datetime
 from itertools import chain
 from typing import Tuple, List, Dict, Callable
 
-import dateutil
+import dateutil.parser
 import numpy as np
 
 from tenders_recommender.dto import Interaction

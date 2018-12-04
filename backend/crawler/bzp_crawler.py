@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from scrapy.selector import Selector
 import json
 import os
+import platform
 import time
 
 from typing import List, Set
@@ -118,7 +119,7 @@ def scrape_offers(offers_ids):
     for id in offers_ids:
 
         if num_of_ids % 500 == 0:
-            file_path = "description" + str(i) + ".json"
+            file_path = "description" + str(num_of_ids / 500) + ".json"
             with open(file_path, "a") as json_file:
                 json.dump(tmp_data, json_file)
             while not os.path.exists(file_path):
@@ -133,7 +134,9 @@ def scrape_offers(offers_ids):
 if __name__ == '__main__':
     offers_ids = parse_offers_set(load_offers())
     chrome_folder_path = os.path.join(os.getcwd(), 'chromedriver')
-    chrome_path = os.path.join(chrome_folder_path, 'chromedriver')
+    chrome_file_name = 'chromedriver' if platform.system() == 'Linux' else 'chromedriver.exe'
+    chrome_path = os.path.join(chrome_folder_path, chrome_file_name)
+
     driver = webdriver.Chrome(chrome_path)
 
     driver.get('https://searchbzp.uzp.gov.pl/Search.aspx')
