@@ -1,5 +1,6 @@
 ### Own ignore files
-tracker/
+resources/config.yml
+resources/
 rmse_summary.json
 
 # Created by .ignore support plugin (hsz.mobi)
@@ -164,3 +165,5 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
+tenders_recommender/config.yml
+tenders_recommender/resources/

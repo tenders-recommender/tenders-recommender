@@ -9,8 +9,8 @@ import numpy as np
 
 from tenders_recommender.dto import Interaction
 
-SAVED_FOLDER: str = os.path.join('..', '..', '..', 'plots', 'data')
-TRACKER_FILE_FOLDER: str = os.path.join('..', '..', '..', '..', 'tracker')
+SAVED_FOLDER: str = os.path.join('..', '..', 'plots', 'data')
+RESOURCES_FILE_FOLDER: str = os.path.join('..', '..', 'resources')
 INTERACTIONS_FILE_NAMES: List[str] = [
     'observed-offers.json',
     'reported-offers.json',
@@ -27,7 +27,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 def load_sorted_test_interactions() -> List[Interaction]:
-    file_paths: Tuple[str, ...] = tuple(os.path.join(TRACKER_FILE_FOLDER, file_name)
+    file_paths: Tuple[str, ...] = tuple(os.path.join(RESOURCES_FILE_FOLDER, file_name)
                                         for file_name in INTERACTIONS_FILE_NAMES)
 
     interaction_date_getter: Callable[[Interaction], datetime] = lambda interaction: \
