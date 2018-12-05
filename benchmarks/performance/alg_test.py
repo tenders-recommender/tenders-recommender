@@ -6,7 +6,7 @@ import numpy as np
 from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
 
 from benchmarks.test_util import load_sorted_test_interactions, add_rmse_to_file
-from tenders_recommender.dto import Interaction, ParsedData
+from tenders_recommender.model import Interaction, ParsedData
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer

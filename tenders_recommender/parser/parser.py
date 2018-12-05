@@ -5,7 +5,7 @@ from pandas import DataFrame
 from surprise import Reader, Dataset, Trainset
 from surprise.dataset import DatasetAutoFolds
 
-from tenders_recommender.dto import ParsedData, Interaction, Testset
+from tenders_recommender.model import ParsedData, Interaction, Testset
 
 USER_ID: str = 'user_id'
 OFFER_ID: str = 'offer_id'

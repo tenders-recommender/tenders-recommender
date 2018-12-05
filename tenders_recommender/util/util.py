@@ -6,7 +6,7 @@ import re
 
 from typing import List
 
-from tenders_recommender.dto import Recommendation
+from tenders_recommender.model import Recommendation
 
 DATA_FILE_FOLDER: str = os.path.join('..', '..', 'plots', 'data')
 

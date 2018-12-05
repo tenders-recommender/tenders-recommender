@@ -1,6 +1,5 @@
-from tenders_recommender.api import service_api
+from tenders_recommender.api import start_service
 
 
 if __name__ == '__main__':
-    print('Started Tenders Recommender API')
-    service_api.run()
+    start_service()

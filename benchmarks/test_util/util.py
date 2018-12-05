@@ -7,7 +7,7 @@ from typing import Tuple, List, Dict, Callable
 import dateutil.parser
 import numpy as np
 
-from tenders_recommender.dto import Interaction
+from tenders_recommender.model import Interaction
 
 SAVED_FOLDER: str = os.path.join('..', '..', 'plots', 'data')
 RESOURCES_FILE_FOLDER: str = os.path.join('..', '..', 'resources')

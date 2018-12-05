@@ -1,12 +1,12 @@
 import operator
 from typing import List
+from threading import Lock
 
 from cachetools import LRUCache, cachedmethod
 from surprise import Prediction, AlgoBase, SVD
 
-from tenders_recommender.dao.user_interactions import UsersInteractions
-from tenders_recommender.database.database_manager import DatabaseManager
-from tenders_recommender.dto import Recommendation, Interaction, ParsedData
+from tenders_recommender.dao import UsersInteractionsDao
+from tenders_recommender.model import Recommendation, Interaction, ParsedData, UsersInteractions
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer
@@ -16,37 +16,41 @@ class RecommenderService(object):
 
     def __init__(self, cache_size: int):
         self.cache = LRUCache(maxsize=cache_size)
+        self.__training_lock = Lock()
         self.__recommender: Recommender = None
-        self.database_manager = DatabaseManager()
 
-    def populate_interactions(self, new_interactions: List[Interaction]):
-        self.database_manager.insert_users_interactions(UsersInteractions(new_interactions))
+    def populate_interactions(self, new_interactions: List[Interaction]) -> None:
+        UsersInteractionsDao.insert_users_interactions(UsersInteractions(new_interactions))
 
-    def train_algorithm(self):
-        interactions: List[Interaction] = []
-        all_interactions = self.database_manager.query_all_user_interactions()
-        for interaction in all_interactions:
-            interactions.extend(interaction.users_interactions)
+    def train_algorithm(self) -> None:
+        is_acquired = self.__training_lock.acquire(blocking=False)
 
-        parsed_data: ParsedData = Parser.parse(interactions)
+        if is_acquired:
+            try:
+                all_interactions = UsersInteractionsDao.query_all_users_interactions()
 
-        algorithm: AlgoBase = SVD(
-            n_factors=50,
-            n_epochs=50,
-            biased=True,
-            init_mean=0,
-            init_std_dev=0,
-            lr_all=0.01,
-            reg_all=0.01,
-        )
+                parsed_data: ParsedData = Parser.parse(all_interactions)
 
-        all_predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
-                                                                         parsed_data.test_set,
-                                                                         algorithm)
-        self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
-        self.cache.clear()
+                algorithm: AlgoBase = SVD(
+                    n_factors=50,
+                    n_epochs=50,
+                    biased=True,
+                    init_mean=0,
+                    init_std_dev=0,
+                    lr_all=0.01,
+                    reg_all=0.01,
+                )
 
-    @cachedmethod(operator.attrgetter('cache'))
+                all_predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
+                                                                                 parsed_data.test_set,
+                                                                                 algorithm)
+                self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
+                self.cache.clear()
+            finally:
+                self.__training_lock.release()
+        else:
+            raise ValueError('Algorithm is already being trained.')
+
     def get_rmse(self) -> float:
         return self.__recommender.calc_rmse()
 

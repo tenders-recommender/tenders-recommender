@@ -6,7 +6,7 @@ import dateutil
 import numpy as np
 from surprise import KNNBasic
 
-from tenders_recommender.dto import Interaction
+from tenders_recommender.model import Interaction
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer

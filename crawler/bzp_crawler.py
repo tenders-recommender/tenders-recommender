@@ -13,7 +13,7 @@ import time
 
 from typing import List, Set
 
-from tenders_recommender.dto import Interaction
+from tenders_recommender.model import Interaction
 from benchmarks.test_util import load_sorted_test_interactions
 
 tmp_data = []
