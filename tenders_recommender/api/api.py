@@ -52,7 +52,7 @@ def get_recommendations(user_id: int):
     return jsonify({'data': [r._asdict() for r in recommendations]})
 
 
-@service_api.teardown_appcontext()
+@service_api.teardown_appcontext
 def remove_database_session():
     Session.close()
 
