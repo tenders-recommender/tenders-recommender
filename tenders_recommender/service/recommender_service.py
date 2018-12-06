@@ -18,6 +18,7 @@ class RecommenderService(object):
         self.cache = LRUCache(maxsize=cache_size)
         self.__training_lock = Lock()
         self.__recommender: Recommender = None
+        self.__average_recommendations: List[Recommendation] = None
 
     def populate_interactions(self, new_interactions: List[Interaction]) -> None:
         UsersInteractionsDao.insert_users_interactions(UsersInteractions(new_interactions))
@@ -45,6 +46,8 @@ class RecommenderService(object):
                                                                                  parsed_data.test_set,
                                                                                  algorithm)
                 self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
+
+                self.__average_recommendations = self.__recommender.calc_average_recommendations()
                 self.cache.clear()
             finally:
                 self.__training_lock.release()
@@ -59,4 +62,8 @@ class RecommenderService(object):
 
     @cachedmethod(operator.attrgetter('cache'))
     def __get_recommendations(self, given_user_id: int) -> List[Recommendation]:
-        return self.__recommender.calc_recommendations(given_user_id)
+        recommendations = self.__recommender.calc_recommendations(given_user_id)
+
+        return recommendations \
+            if len(recommendations) > 0 \
+            else self.__average_recommendations
