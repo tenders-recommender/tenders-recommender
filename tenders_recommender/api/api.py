@@ -53,7 +53,7 @@ def get_recommendations(user_id: int):
 
 
 @service_api.teardown_appcontext
-def remove_database_session():
+def remove_database_session(exc=None):
     Session.close()
 
 

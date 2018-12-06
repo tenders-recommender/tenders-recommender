@@ -34,7 +34,7 @@ class Recommender(object):
 
         recommendations: List[Recommendation] = []
 
-        for offer_id, estimations in offer_estimations_map:
+        for offer_id, estimations in offer_estimations_map.items():
             recommendations.append(Recommendation(self.__ids_offers_map[offer_id], mean(estimations), '-'))
 
         recommendations.sort(key=lambda recommendation: recommendation.estimation, reverse=True)

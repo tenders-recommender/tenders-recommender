@@ -8,8 +8,8 @@ from .types import Interaction
 
 class UsersInteractions(Base):
     __tablename__ = 'users_interactions'
-    id = Column(Integer, primary_key=True)
-    users_interactions = Column(JSON)
+    id: int = Column(Integer, primary_key=True)
+    users_interactions: List[Interaction] = Column(JSON)
 
     def __init__(self, users_interactions: List[Interaction]):
         self.users_interactions = users_interactions

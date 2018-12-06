@@ -1,4 +1,5 @@
 import operator
+from itertools import chain
 from typing import List
 from threading import Lock
 
@@ -28,7 +29,8 @@ class RecommenderService(object):
 
         if is_acquired:
             try:
-                all_interactions = UsersInteractionsDao.query_all_users_interactions()
+                interactions = UsersInteractionsDao.query_all_users_interactions()
+                all_interactions = list(chain.from_iterable(map(lambda inter: inter.users_interactions, interactions)))
 
                 parsed_data: ParsedData = Parser.parse(all_interactions)
 
