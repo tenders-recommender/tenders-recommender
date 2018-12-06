@@ -4,11 +4,13 @@ import os
 import pickle
 import re
 
-from typing import List
+from typing import List, Dict
+from importlib.resources import open_binary
 
 from tenders_recommender.model import Recommendation
 
-DATA_FILE_FOLDER: str = os.path.join('..', '..', 'plots', 'data')
+YEAR_REGEX = re.compile(r'(?:\b|\D)(\d{4})(?:\b|\D)')
+ID_REGEX = re.compile(r'(\d+)')
 
 
 def save_to_file(object_to_save: object, file_path: str) -> None:
@@ -29,25 +31,32 @@ def load_from_file(file_path: str) -> object:
 
 
 def add_descriptions_to_offers(recommendations: List[Recommendation]):
-    file_path = os.path.join(DATA_FILE_FOLDER, 'description.json')
     recommendations_with_desc: List[Recommendation] = []
-    with open(file_path) as file:
+
+    with open_binary('resources', 'description.json') as file:
         descriptions = json.load(file)
+
     for r in recommendations:
         desc = find_description(descriptions, r.offer)
         recommendations_with_desc.append(Recommendation(r.offer, r.estimation, desc))
+
     return recommendations_with_desc
 
 
-def find_description(descriptions: List, offer: str):
-    if not offer.__contains__('bzp'):
+def find_description(descriptions: Dict[str, str], offer: str):
+    if 'bzp' not in offer:
         return '-'
-    for desc in descriptions:
-        key = desc.keys().__iter__().__next__()
-        value = desc.values().__iter__().__next__()
-        id = re.search(r'\d+', key).group().strip()
-        year = key.rsplit('-', 1)[1].strip()
-        if offer.__contains__(id) and offer.__contains__(year):
-            return value
 
-    return '-'
+    year = YEAR_REGEX.findall(offer)[0]
+    offer_without_year = offer.replace(year, '')
+
+    offer_id_list = ID_REGEX.findall(offer_without_year)
+    offer_id = offer_id_list[0] if len(offer_id_list) == 1 else offer_id_list[1]
+
+    offer_key = offer_id + '-' + year
+    description = descriptions[offer_key]
+
+    if description is not None:
+        return description
+    else:
+        return '-'
