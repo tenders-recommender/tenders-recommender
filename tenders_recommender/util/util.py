@@ -30,7 +30,7 @@ def load_from_file(file_path: str) -> object:
     return loaded_object
 
 
-def add_descriptions_to_offers(recommendations: List[Recommendation]):
+def add_descriptions_to_offers(recommendations: List[Recommendation]) -> List[Recommendation]:
     recommendations_with_desc: List[Recommendation] = []
 
     with open_binary('resources', 'description.json') as file:
@@ -43,7 +43,7 @@ def add_descriptions_to_offers(recommendations: List[Recommendation]):
     return recommendations_with_desc
 
 
-def find_description(descriptions: Dict[str, str], offer: str):
+def find_description(descriptions: Dict[str, str], offer: str) -> str:
     if 'bzp' not in offer:
         return '-'
 
