@@ -11,7 +11,7 @@ import os
 import platform
 import time
 
-from typing import List, Set
+from typing import List, Set, Dict
 
 from tenders_recommender.model import Interaction
 from benchmarks.test_util import load_sorted_test_interactions
@@ -146,6 +146,14 @@ if __name__ == '__main__':
     end = datetime.datetime.now()
     print(end - start)
 
-    with open("description_final.json", "a") as json_file:
-        json.dump(tmp_data, json_file)
+    descriptions_dict: Dict[str, str] = dict()
+
+    for complex_description in tmp_data:
+        offer, description = complex_description.popitem()
+        better_offer = offer.replace('-N-', '-')
+        descriptions_dict[better_offer] = description
+
+    with open('description_final.json', 'w') as json_file:
+        json.dump(descriptions_dict, json_file)
+
     driver.close()
