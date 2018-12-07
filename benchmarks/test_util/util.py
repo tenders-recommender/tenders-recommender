@@ -7,6 +7,10 @@ from typing import Tuple, List, Dict, Callable
 import dateutil.parser
 import numpy as np
 
+from tenders_recommender.dao import TestResultsDao
+from tenders_recommender.database import init_database, Session
+from tenders_recommender.model.result_types import ResultTypes
+from tenders_recommender.model.test_results import TestResults
 from tenders_recommender.model import Interaction
 
 SAVED_FOLDER: str = os.path.join('..', '..', 'plots', 'data')
@@ -58,6 +62,14 @@ def add_rmse_to_file(rmse: float,
 
     with open(file_path, 'w') as rmse_file:
         json.dump(entries, rmse_file)
+
+
+def add_results_to_database(results, type, cls=None) -> None:
+    init_database()
+    res = TestResults(ResultTypes().getType(type), json.dumps(results, cls=cls))
+    testResultsDao = TestResultsDao()
+    testResultsDao.insert_results(res)
+    Session.close()
 
 
 def create_file_path(file_name: str) -> str:
