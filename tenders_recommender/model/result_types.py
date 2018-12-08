@@ -11,6 +11,3 @@ class ResultTypes:
         "svd_timesteps": "SVD_TIMESTEPS",
         "rmse_summary": "RMSE_SUMMARY"
     }
-
-    def getType(self, type: str):
-        return self.types[type]
