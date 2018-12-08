@@ -155,7 +155,7 @@ def parse(tmp_data) -> Dict[str, str]:
 
 def start_crawler(offers_ids: List[str]):
     init_database()
-    sub_ofers_ids = [offers_ids[i:i + 10] for i in range(0, len(offers_ids), 10)]
+    sub_ofers_ids = [offers_ids[i:i + 1000] for i in range(0, len(offers_ids), 1000)]
     for sub_ids in sub_ofers_ids:
         tmp_data = scrape_offers(sub_ids)
         descriptions_dict = parse(tmp_data)
