@@ -6,15 +6,6 @@ import plotly.graph_objs as go
 import plotly.io as pio
 
 
-def create_default_df():
-    data = json.load(open_binary('resources.plots', 'rmse_svd_params.json'))
-    complete_df = pd.DataFrame(data)
-    complete_df['mean_time'] = complete_df['mean_fit_time'] + complete_df['mean_test_time']
-    complete_df['std_time'] = complete_df['std_fit_time'] + complete_df['std_test_time']
-
-    return complete_df
-
-
 def make_plot(complete_df: pd.DataFrame, param_name: str, x_dtick: float, y_dtick: float):
     print(complete_df)
 
@@ -82,6 +73,15 @@ def make_plot(complete_df: pd.DataFrame, param_name: str, x_dtick: float, y_dtic
     pio.write_image(fig, 'svd_' + param_name + '_comparison.svg')
 
 
+def create_default_df():
+    data = json.load(open_binary('resources.plots', 'rmse_svd_params.json'))
+    complete_df = pd.DataFrame(data)
+    complete_df['mean_time'] = complete_df['mean_fit_time'] + complete_df['mean_test_time']
+    complete_df['std_time'] = complete_df['std_fit_time'] + complete_df['std_test_time']
+
+    return complete_df
+
+
 def make_param_biased_plot():
     df = create_default_df()
     make_plot(df, 'biased', 5, 0.1)
@@ -139,4 +139,10 @@ def make_param_reg_all_plot():
 
 
 if __name__ == '__main__':
-    make_plot()
+    make_param_biased_plot()
+    make_param_init_mean_plot()
+    make_param_n_epochs_plot()
+    make_param_init_std_dev_plot()
+    make_param_lr_all_plot()
+    make_param_n_factors_plot()
+    make_param_reg_all_plot()
