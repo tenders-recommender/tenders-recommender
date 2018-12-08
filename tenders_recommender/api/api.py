@@ -6,9 +6,10 @@ from flask import request
 from flask_cors import CORS
 
 from tenders_recommender.database import Session, init_database
-from tenders_recommender.model import Interaction, Recommendation
+from tenders_recommender.model import Interaction, Recommendation, TestResults, ResultTypes
 from tenders_recommender.service import RecommenderService
 from tenders_recommender.util import add_descriptions_to_offers
+from tenders_recommender.dao import TestResultsDao
 
 # json arrays are packed in object so it is safe
 # against redefining js Array constructor exploit
@@ -50,6 +51,12 @@ def get_recommendations(user_id: int):
         else recommender_service.get_recommendations(user_id)
     recommendations = add_descriptions_to_offers(recommendations)
     return jsonify({'data': [r._asdict() for r in recommendations]})
+
+
+@service_api.route('/results/<string:type>')
+def get_param_comparison(type: str):
+    data = TestResultsDao().query_results(ResultTypes().getType(type))
+    return data
 
 
 @service_api.teardown_appcontext

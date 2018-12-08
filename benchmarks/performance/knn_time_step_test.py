@@ -1,6 +1,6 @@
 import random
 from datetime import datetime, timedelta
-from typing import List, Callable
+from typing import List, Callable, Dict
 
 import dateutil
 import numpy as np
@@ -10,10 +10,10 @@ from tenders_recommender.model import Interaction
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer
-from benchmarks.test_util import load_sorted_test_interactions, add_rmse_to_file
+from benchmarks.test_util import load_sorted_test_interactions, add_results_to_database
 
 
-def main():
+def test() -> [Dict[str, object]]:
     seed = 0
     random.seed(seed)
     np.random.seed(seed)
@@ -37,6 +37,7 @@ def main():
 
     earlier_than = first_date
     interactions_slice_index = 0
+    entries = []
 
     while earlier_than <= last_date:
         earlier_than += delta
@@ -58,15 +59,16 @@ def main():
         recommender = Recommender(parsed_data.ids_offers_map, predictions)
 
         rmse = recommender.calc_rmse()
-        add_rmse_to_file(rmse,
-                         'rmse_knn_time_step.json',
-                         ('earlier_than', earlier_than.timestamp()),
-                         ('time_elapsed', time_elapsed),
-                         ('interactions', len(filtered_interactions)))
+        entry: Dict[str, object] = {'rmse': rmse}
+        entry['earlier_than'] = earlier_than.timestamp()
+        entry['time_elapsed'] = time_elapsed
+        entry['interactions'] = len(filtered_interactions)
+        entries.append(entry)
 
         print(earlier_than.strftime("%Y-%m-%d") +
               ', rmse: ' + str(rmse) +
               ', interactions: ' + str(len(filtered_interactions)))
+    return entries
 
 
 def get_interactions_slice_index(all_interactions: List[Interaction],
@@ -85,4 +87,5 @@ def get_interactions_slice_index(all_interactions: List[Interaction],
 
 
 if __name__ == '__main__':
-    main()
+    results = test()
+    add_results_to_database(results, "knn_timesteps")

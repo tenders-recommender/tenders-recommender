@@ -3,14 +3,15 @@ from datetime import datetime
 
 import numpy as np
 from surprise import KNNBasic
+from typing import Dict
 
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer
-from benchmarks.test_util import load_sorted_test_interactions, add_rmse_to_file
+from benchmarks.test_util import load_sorted_test_interactions, add_results_to_database
 
 
-def main():
+def test() -> [Dict[str, object]]:
     seed = 0
     random.seed(seed)
     np.random.seed(seed)
@@ -22,6 +23,7 @@ def main():
 
     interactions = load_sorted_test_interactions()
     parsed_data = Parser.parse(interactions)
+    entries = []
 
     for k in k_range:
         for min_k in min_k_range:
@@ -45,17 +47,20 @@ def main():
 
                         recommender = Recommender(parsed_data.ids_offers_map, predictions)
 
-                        add_rmse_to_file(recommender.calc_rmse(),
-                                         'rmse_knn_params.json',
-                                         ('alg_name', KNNBasic.__name__),
-                                         ('time_elapsed', time_elapsed),
-                                         ('k', k),
-                                         ('min_k', min_k),
-                                         ('sim_options', sim_options))
+                        entry: Dict[str, object] = {'rmse': recommender.calc_rmse()}
+                        entry['alg_name'] = KNNBasic.__name__
+                        entry['time_elapsed'] = time_elapsed
+                        entry['k'] = k
+                        entry['min_k'] = min_k
+                        entry['sim_options'] = sim_options
+                        entries.append(entry)
+
                     except Exception as e:
                         print(e)
                     print("")
+    return entries
 
 
 if __name__ == '__main__':
-    main()
+    results = test()
+    add_results_to_database(results, "knn")

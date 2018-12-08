@@ -8,10 +8,10 @@ from surprise.model_selection import GridSearchCV, KFold
 
 from tenders_recommender.parser import Parser
 from benchmarks.test_util import load_sorted_test_interactions
-from benchmarks.test_util.util import create_file_path, NumpyEncoder
+from benchmarks.test_util.util import create_file_path, NumpyEncoder, add_results_to_database
 
 
-def main():
+def test():
     seed = 0
     random.seed(seed)
     np.random.seed(seed)
@@ -44,10 +44,8 @@ def main():
     print(grid_search.best_params['rmse'])
     print(grid_search.cv_results)
 
-    file_path = create_file_path('rmse_svd_params.json')
-    with open(file_path, 'w') as f:
-        json.dump(grid_search.cv_results, f, cls=NumpyEncoder)
+    add_results_to_database(grid_search.cv_results, "svd", cls=NumpyEncoder)
 
 
 if __name__ == '__main__':
-    main()
+    test()

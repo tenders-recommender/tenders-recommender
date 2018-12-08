@@ -1,12 +1,11 @@
-import json
 import os
 
 import pickle
 import re
 
 from typing import List, Dict
-from importlib.resources import open_binary
-
+from collections import ChainMap
+from tenders_recommender.dao import DescriptionsDao
 from tenders_recommender.model import Recommendation
 
 YEAR_REGEX = re.compile(r'(?:\b|\D)(\d{4})(?:\b|\D)')
@@ -33,8 +32,12 @@ def load_from_file(file_path: str) -> object:
 def add_descriptions_to_offers(recommendations: List[Recommendation]) -> List[Recommendation]:
     recommendations_with_desc: List[Recommendation] = []
 
-    with open_binary('resources', 'description.json') as file:
-        descriptions = json.load(file)
+    descriptions_dao = DescriptionsDao()
+    results = descriptions_dao.query_all_descriptions()
+    descriptions_list: List = []
+    for result in results:
+        descriptions_list.append(result.data)
+    descriptions = dict(ChainMap(*descriptions_list))
 
     for r in recommendations:
         desc = find_description(descriptions, r.offer)

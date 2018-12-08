@@ -1,11 +1,11 @@
 import random
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
 
-from benchmarks.test_util import load_sorted_test_interactions, add_rmse_to_file
+from benchmarks.test_util import load_sorted_test_interactions, add_rmse_to_file, add_results_to_database
 from tenders_recommender.model import Interaction, ParsedData
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
@@ -13,7 +13,7 @@ from tenders_recommender.trainer import AlgoTrainer
 from surprise.model_selection import KFold
 
 
-def main():
+def test() -> [Dict[str, object]]:
     alg_list = [SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans]
 
     seed = 0
@@ -23,6 +23,7 @@ def main():
     interactions: List[Interaction] = load_sorted_test_interactions()
     parsed_data: ParsedData = Parser.parse(interactions)
     kf = KFold(n_splits=3)
+    entries = []
 
     for trainset, testset in kf.split(parsed_data.whole_data_set):
         for alg_to_test in alg_list:
@@ -36,14 +37,18 @@ def main():
 
                 recommender = Recommender(parsed_data.ids_offers_map, predictions)
 
-                add_rmse_to_file(recommender.calc_rmse(),
-                                 'rmse_alg.json',
-                                 ('alg_name', alg_to_test.__name__),
-                                 ('time_elapsed', time_elapsed))
+                entry: Dict[str, object] = {'rmse': recommender.calc_rmse()}
+                entry['algorithm'] = alg_to_test.__name__
+                entry['time_elapsed'] = time_elapsed
+                entries.append(entry)
+
             except Exception as e:
                 print(e)
             print("")
 
+    return entries
+
 
 if __name__ == '__main__':
-    main()
+    results = test()
+    add_results_to_database(results, "algorithm_comparison")
