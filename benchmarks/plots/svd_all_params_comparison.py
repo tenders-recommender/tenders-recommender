@@ -11,43 +11,30 @@ def make_plot():
     complete_df = pd.DataFrame(data)
     complete_df['mean_time'] = complete_df['mean_fit_time'] + complete_df['mean_test_time']
     complete_df['std_time'] = complete_df['std_fit_time'] + complete_df['std_test_time']
-    complete_df = complete_df[complete_df['param_biased']]
-    complete_df = complete_df[complete_df['param_init_mean'] == 0]
-    complete_df = complete_df[complete_df['param_n_epochs'] == 50]
-    complete_df = complete_df[complete_df['param_init_std_dev'] == 0.0]
-    complete_df = complete_df[complete_df['param_lr_all'] == 0.01]
 
     print(complete_df)
 
-    # max_y = (complete_df['rmse']['mean'] + complete_df['rmse']['std']).max() * 1.1
     max_x = (complete_df['mean_time'] + complete_df['std_time']).max() * 1.1
 
-    traces = []
-    for index, value in enumerate(complete_df['param_n_factors'].unique()):
-        value_df = complete_df[complete_df['param_n_factors'] == value]
-
-        trace = go.Scatter(
-            y=value_df['mean_test_rmse'],
-            x=value_df['mean_time'],
-            error_y={
-                'array': value_df['std_test_rmse']
-            },
-            error_x={
-                'array': value_df['std_time']
-            },
-            mode='markers',
-            marker=go.scatter.Marker(
-                size=5
-            ),
-            name=str(value)
+    traces = [go.Scatter(
+        y=complete_df['mean_test_rmse'],
+        x=complete_df['mean_time'],
+        error_y={
+            'array': complete_df['std_test_rmse']
+        },
+        error_x={
+            'array': complete_df['std_time']
+        },
+        mode='markers',
+        marker=go.scatter.Marker(
+            size=1
         )
-
-        traces.append(trace)
+    )]
 
     layout = go.Layout(
         width=700,
         height=800,
-        showlegend=True,
+        showlegend=False,
         margin=go.layout.Margin(
             t=10,
             b=40,
@@ -55,7 +42,7 @@ def make_plot():
             r=40
         ),
         legend=go.layout.Legend(
-            orientation='v'
+            orientation='h'
         ),
         xaxis=go.layout.XAxis(
             title='Training time [s]',
@@ -74,14 +61,14 @@ def make_plot():
             zeroline=False,
             showline=True,
             showticklabels=True,
-            dtick=0.001,
+            dtick=0.1,
             tickangle=-30
         )
     )
 
     fig = go.Figure(data=traces, layout=layout)
 
-    pio.write_image(fig, 'svd_n_factors_comparison.svg')
+    pio.write_image(fig, 'svd_params_comparison.svg')
 
 
 if __name__ == '__main__':
