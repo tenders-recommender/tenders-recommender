@@ -1,14 +1,12 @@
-import json
 import random
 from typing import Dict, List
 
 import numpy as np
 from surprise import SVD
 from surprise.model_selection import GridSearchCV, KFold
-
 from tenders_recommender.parser import Parser
 from benchmarks.test_util import load_sorted_test_interactions
-from benchmarks.test_util.util import create_file_path, NumpyEncoder, add_results_to_database
+from benchmarks.test_util.util import NumpyEncoder, add_results_to_database
 
 
 def test():
