@@ -66,7 +66,7 @@ def add_rmse_to_file(rmse: float,
 
 def add_results_to_database(results, type, cls=None) -> None:
     init_database()
-    res = TestResults(ResultTypes().getType(type), json.dumps(results, cls=cls))
+    res = TestResults(ResultTypes.types[type], json.dumps(results, cls=cls))
     testResultsDao = TestResultsDao()
     testResultsDao.insert_results(res)
     Session.close()

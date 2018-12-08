@@ -55,7 +55,7 @@ def get_recommendations(user_id: int):
 
 @service_api.route('/results/<string:type>')
 def get_param_comparison(type: str):
-    data = TestResultsDao().query_results(ResultTypes().getType(type))
+    data = TestResultsDao().query_results(type)
     return data
 
 

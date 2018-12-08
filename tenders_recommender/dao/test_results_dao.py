@@ -1,5 +1,5 @@
 from tenders_recommender.database import Session
-from tenders_recommender.model import TestResults
+from tenders_recommender.model import TestResults, ResultTypes
 
 
 class TestResultsDao(object):
@@ -11,5 +11,6 @@ class TestResultsDao(object):
 
     @staticmethod
     def query_results(type: str):
-        json = Session.query(TestResults).filter_by(type=type).order_by(TestResults.id.desc()).first()
+        result_type = ResultTypes.types[type]
+        json = Session.query(TestResults).filter_by(type=result_type).order_by(TestResults.id.desc()).first()
         return json.results

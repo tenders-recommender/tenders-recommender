@@ -17,8 +17,8 @@ TYPE: str = 'type'
 
 DEFAULT_SCORE_MAP = MappingProxyType({
     'observed-offer': 5.0,
-    'reported-offer': 2.0,
-    'viewed-offer': 3.0
+    'reported-offer': 5.0,
+    'viewed-offer': 4.0
 })
 DEFAULT_SCALE: Tuple[float, float] = (1, 5)
 
