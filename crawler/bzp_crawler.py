@@ -1,5 +1,7 @@
 import datetime
-import numpy as np
+from collections import ChainMap
+from itertools import accumulate, chain, repeat, tee
+
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,10 +13,9 @@ import platform
 
 from typing import List, Set, Dict
 
-from tenders_recommender.dao import DescriptionsDao
+from tenders_recommender.dao import DescriptionsDao, UsersInteractionsDao
 from tenders_recommender.database import init_database, Session
-from tenders_recommender.model import Interaction, Descriptions
-from benchmarks.test_util import load_sorted_test_interactions
+from tenders_recommender.model import Descriptions
 
 WHAT = "what"
 
@@ -26,11 +27,29 @@ result_row_css = 'tr.dxgvDataRow_Aqua'
 bzp_site = 'https://searchbzp.uzp.gov.pl/Search.aspx'
 
 
-def load_offers():
-    interactions: List[Interaction] = load_sorted_test_interactions()
-    offers_set: Set[str] = {interaction[WHAT] for interaction in interactions
+def load_offers() -> List[str]:
+    interactions = UsersInteractionsDao.query_all_users_interactions()
+    all_interactions = list(chain.from_iterable(map(lambda inter: inter.users_interactions, interactions)))
+    offers_set: Set[str] = {interaction[WHAT] for interaction in all_interactions
                             if interaction[WHAT].__contains__("bzp")}
-    return offers_set
+    offers = parse_offers_set(offers_set)
+    print("Number of all offers: " + str(len(offers_set)))
+
+    descriptions_dao = DescriptionsDao()
+    results = descriptions_dao.query_all_descriptions()
+    descriptions_list: List = []
+    for result in results:
+        descriptions_list.append(result.data)
+    descriptions = dict(ChainMap(*descriptions_list))
+
+    unique_offers_list: List[str] = []
+    for offer_id in offers:
+        parsed_id = offer_id.replace('-N-', '-')
+        if parsed_id not in descriptions:
+            unique_offers_list.append(offer_id)
+
+    print("Number of offers without description: " + str(len(unique_offers_list)))
+    return unique_offers_list
 
 
 def parse_offers_set(offers_set: Set) -> List[str]:
@@ -49,64 +68,67 @@ def parse_offers_set(offers_set: Set) -> List[str]:
     return offers_ids
 
 
-def isElementSelected(xpath: str) -> bool:
+def isElementSelected(xpath: str, driver) -> bool:
     try:
-        return WebDriverWait(driver, 3).until(EC.element_located_to_be_selected((By.XPATH, xpath)))
+        return WebDriverWait(driver, 1).until(EC.element_located_to_be_selected((By.XPATH, xpath)))
     except:
         try:
-            return WebDriverWait(driver, 3).until(EC.element_located_to_be_selected((By.XPATH, xpath)))
+            return WebDriverWait(driver, 1).until(EC.element_located_to_be_selected((By.XPATH, xpath)))
         except:
             return False
 
 
-def isElementFound(xpath: str) -> bool:
+def isElementFound(xpath: str, driver) -> bool:
     try:
-        return WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.XPATH, xpath)))
+        return WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath)))
     except:
         try:
-            return WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.XPATH, xpath)))
+            return WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath)))
         except:
             return False
 
 
-def selectElement(xpath: str) -> None:
+def selectElement(xpath: str, driver) -> None:
     try:
-        WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
+        WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
     except:
         try:
-            WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
+            WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
         except:
             print("cannot select offers button")
 
 
-def clickSearch(xpath: str) -> None:
+def clickSearch(xpath: str, driver) -> None:
     try:
-        WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
+        WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
     except:
+        print("Search click failed, trying again")
         try:
-            WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
+            WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).click()
         except:
-            print("Search click failed")
+            print("Search click failed second time")
 
 
-def clear_text(xpath: str) -> None:
+def clear_text(xpath: str, driver) -> None:
     try:
-        WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).clear()
+        WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).clear()
     except:
+        print("Clear text failed, trying again..")
         try:
-            WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).clear()
+            WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).clear()
         except:
-            print("Clear text failed")
+            print("Clear text failed second time")
 
 
-def sendText(xpath: str, text: str):
+def sendText(xpath: str, text: str, driver):
     try:
-        WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(text)
+        WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(text)
     except:
+        print("Send text failed, trying again")
         try:
-            WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(text)
+            WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(text)
         except:
-            print("Send text failed")
+            print("Send text failed second time")
 
 
 def get_record(html: str, id: str) -> Dict:
@@ -117,13 +139,13 @@ def get_record(html: str, id: str) -> Dict:
         print("fail to get offer " + id)
 
 
-def find_data(offers_radio_button_xpath: str, id: str) -> Dict:
-    selectElement(offers_radio_button_xpath)
-    clear_text(offer_input_xpath)
-    sendText(offer_input_xpath, id)
-    clickSearch(search_xpath)
+def find_data(offers_radio_button_xpath: str, id: str, driver) -> Dict:
+    selectElement(offers_radio_button_xpath, driver)
+    clear_text(offer_input_xpath, driver)
+    sendText(offer_input_xpath, id, driver)
+    clickSearch(search_xpath, driver)
     searched_element_xpath = '//td[contains(text(),"' + id + '")]'
-    found = isElementFound(searched_element_xpath)
+    found = isElementFound(searched_element_xpath, driver)
     record = None
     if found:
         html = driver.page_source
@@ -131,15 +153,16 @@ def find_data(offers_radio_button_xpath: str, id: str) -> Dict:
     return record
 
 
-def scrape_offers(offers_ids: List[str]) -> List[str]:
+def scrape_offers(offers_ids: List[str], driver) -> List[str]:
     tmp_data: List[str] = []
     print(len(offers_ids))
     for id in offers_ids:
-        record = find_data(old_offers_radio_xpath, id)
+        record = find_data(old_offers_radio_xpath, id, driver)
         if record is None:
-            record = find_data(new_offers_radio_xpath, id)
+            record = find_data(new_offers_radio_xpath, id, driver)
         if record is not None:
             tmp_data.append(record)
+        driver.refresh()
     return tmp_data
 
 
@@ -155,28 +178,29 @@ def parse(tmp_data) -> Dict[str, str]:
 
 def start_crawler(offers_ids: List[str]):
     init_database()
-    sub_ofers_ids = [offers_ids[i:i + 1000] for i in range(0, len(offers_ids), 1000)]
+    chrome_folder_path = os.path.join(os.getcwd(), 'chromedriver')
+    chrome_file_name = 'chromedriver' if platform.system() == 'Linux' else 'chromedriver.exe'
+    chrome_path = os.path.join(chrome_folder_path, chrome_file_name)
+    driver = webdriver.Chrome(chrome_path)
+    driver.get(bzp_site)
+
+    sub_ofers_ids = [offers_ids[i:i + 100] for i in range(0, len(offers_ids), 100)]
     for sub_ids in sub_ofers_ids:
-        tmp_data = scrape_offers(sub_ids)
+        start = datetime.datetime.now()
+        tmp_data = scrape_offers(sub_ids, driver)
         descriptions_dict = parse(tmp_data)
+        print("found " + str(len(descriptions_dict)) + " descriptions out of 500")
+        end = datetime.datetime.now()
+        print("Time needed:" + str(end - start))
         descriptions_dao = DescriptionsDao()
         descriptions_dao.insert_description(Descriptions(descriptions_dict))
+    driver.close()
     Session.close()
 
 
 if __name__ == '__main__':
-    offers_ids = parse_offers_set(load_offers())
-    chrome_folder_path = os.path.join(os.getcwd(), 'chromedriver')
-    chrome_file_name = 'chromedriver' if platform.system() == 'Linux' else 'chromedriver.exe'
-    chrome_path = os.path.join(chrome_folder_path, chrome_file_name)
-
-    driver = webdriver.Chrome(chrome_path)
-
-    driver.get(bzp_site)
-
+    offers_ids = load_offers()
     start = datetime.datetime.now()
     start_crawler(offers_ids)
     end = datetime.datetime.now()
-    print(end - start)
-
-    driver.close()
+    print("Time of whole crawling:" + str(end - start))
