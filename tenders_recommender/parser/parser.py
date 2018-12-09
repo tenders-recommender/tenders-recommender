@@ -1,5 +1,6 @@
+from collections import OrderedDict
 from types import MappingProxyType
-from typing import List, Tuple, Dict, Set
+from typing import List, Tuple, Dict
 
 from pandas import DataFrame
 from surprise import Reader, Dataset, Trainset
@@ -29,8 +30,8 @@ class Parser(object):
     def parse(all_interactions: List[Interaction],
               score_map: Dict[str, float] = DEFAULT_SCORE_MAP,
               rating_scale: Tuple[float, float] = DEFAULT_SCALE) -> ParsedData:
-        offers_set: Set[str] = {interaction[WHAT] for interaction in all_interactions}
-        offers_ids_map: Dict[str, int] = {offer_name: (index + 1) for index, offer_name in enumerate(offers_set)}
+        unique_offers = list(OrderedDict.fromkeys(map(lambda interaction: interaction[WHAT], all_interactions)))
+        offers_ids_map: Dict[str, int] = {offer_name: (index + 1) for index, offer_name in enumerate(unique_offers)}
 
         data_frame: DataFrame = Parser.__create_data_frame(offers_ids_map, all_interactions, score_map)
         whole_data_set, train_set, test_set = Parser.__create_data_sets(data_frame, rating_scale)

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Dict
 
 import numpy as np
-from surprise import SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
+from surprise import SVD, KNNBaseline, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans, Prediction
 
 from benchmarks.test_util import load_sorted_test_interactions, add_results_to_database
 from tenders_recommender.model import Interaction, ParsedData
@@ -14,7 +14,7 @@ from surprise.model_selection import KFold
 
 
 def test() -> [Dict[str, object]]:
-    alg_list = [SVD, KNNBaseline, SlopeOne, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans]
+    alg_list = [SVD, KNNBaseline, BaselineOnly, CoClustering, NMF, KNNBasic, KNNWithMeans]
 
     seed = 0
     random.seed(seed)
@@ -22,7 +22,7 @@ def test() -> [Dict[str, object]]:
 
     interactions: List[Interaction] = load_sorted_test_interactions()
     parsed_data: ParsedData = Parser.parse(interactions)
-    kf = KFold(n_splits=3)
+    kf = KFold(n_splits=5)
     entries = []
 
     for trainset, testset in kf.split(parsed_data.whole_data_set):

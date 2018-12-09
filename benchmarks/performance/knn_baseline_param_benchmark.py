@@ -19,15 +19,14 @@ def prepare_data() -> DatasetAutoFolds:
 
 def prepare_param_grid_als() -> Dict[str, List[object]]:
     param_grid_als: Dict[str, List[object]] = {'bsl_options': {'method': ['als'],
-                                                               'reg_u': [8, 10, 12, 14],
-                                                               'reg_i': [2, 3, 4, 5],
-                                                               'n_epochs': [5, 6, 7, 8]
+                                                               'reg_u': [8, 14],
+                                                               'reg_i': [2, 5],
+                                                               'n_epochs': [5, 8]
                                                                },
-                                               'min_k': [1, 2, 3],
-                                               'k': [1, 10, 20, 45],
-
+                                               'min_k': [1, 2],
+                                               'k': [2, 20],
                                                'sim_options': {'name': ['cosine', 'msd', 'pearson', 'pearson_baseline'],
-                                                               'min_support': [1, 2, 3],
+                                                               'min_support': [1, 3],
                                                                'user_based': [True]}
                                                }
     return param_grid_als
@@ -35,15 +34,14 @@ def prepare_param_grid_als() -> Dict[str, List[object]]:
 
 def prepare_param_grid_sgd() -> Dict[str, List[object]]:
     param_grid_sgd: Dict[str, List[object]] = {'bsl_options': {'method': ['sgd'],
-                                                               'learning_rate': [0.001, 0.005, 0.01],
+                                                               'learning_rate': [0.001, 0.01],
                                                                'reg': [1, 2],
-                                                               'n_epochs': [5, 6, 7, 8]
+                                                               'n_epochs': [5, 8]
                                                                },
-                                               'min_k': [1, 2, 3],
-                                               'k': [1, 10, 20, 45],
-                                               'learning_rate': [0.001, 0.005, 0.01],
+                                               'min_k': [1, 2],
+                                               'k': [2, 20],
                                                'sim_options': {'name': ['cosine', 'msd', 'pearson', 'pearson_baseline'],
-                                                               'min_support': [1, 2, 3],
+                                                               'min_support': [1, 3],
                                                                'user_based': [True]}
                                                }
     return param_grid_sgd
@@ -58,7 +56,7 @@ def test(data_set: DatasetAutoFolds, param_grid, type: str) -> None:
         algo_class=KNNBaseline,
         param_grid=param_grid,
         measures=['rmse'],
-        cv=KFold(5),
+        cv=KFold(4),
         n_jobs=-1
     )
 
