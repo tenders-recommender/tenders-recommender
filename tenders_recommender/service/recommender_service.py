@@ -7,7 +7,8 @@ from cachetools import LRUCache, cachedmethod
 from surprise import Prediction, AlgoBase, SVD
 
 from tenders_recommender.dao import UsersInteractionsDao
-from tenders_recommender.model import Recommendation, Interaction, ParsedData, UsersInteractions
+from tenders_recommender.dto import Recommendation, Interaction, ParsedData
+from tenders_recommender.model import UsersInteractions
 from tenders_recommender.parser import Parser
 from tenders_recommender.recommender import Recommender
 from tenders_recommender.trainer import AlgoTrainer
@@ -28,11 +29,14 @@ class RecommenderService(object):
         is_acquired = self.__training_lock.acquire(blocking=False)
 
         if is_acquired:
+            print('Training lock acquired')
             try:
                 interactions = UsersInteractionsDao.query_all_users_interactions()
+                print('Interactions downloaded from database')
                 all_interactions = list(chain.from_iterable(map(lambda inter: inter.users_interactions, interactions)))
 
                 parsed_data: ParsedData = Parser.parse(all_interactions)
+                print('Data parsed')
 
                 algorithm: AlgoBase = SVD(
                     n_factors=50,
@@ -47,12 +51,17 @@ class RecommenderService(object):
                 all_predictions: List[Prediction] = AlgoTrainer.calc_predictions(parsed_data.train_set,
                                                                                  parsed_data.test_set,
                                                                                  algorithm)
+                print('Predictions calculated')
                 self.__recommender = Recommender(parsed_data.ids_offers_map, all_predictions)
 
                 self.__average_recommendations = self.__recommender.calc_average_recommendations()
+                print('Average recommendations calculated')
+
                 self.cache.clear()
+                print('Previous cache cleared')
             finally:
                 self.__training_lock.release()
+                print('Training lock released')
         else:
             raise ValueError('Algorithm is already being trained.')
 

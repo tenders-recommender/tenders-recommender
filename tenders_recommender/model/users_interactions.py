@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import Column, Integer, JSON
 
 from tenders_recommender.database.database_config import Base
-from .types import Interaction
+from tenders_recommender.dto import Interaction
 
 
 class UsersInteractions(Base):

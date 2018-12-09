@@ -2,7 +2,7 @@ from typing import List
 
 from surprise import AlgoBase, Trainset, Prediction
 
-from tenders_recommender.model import Testset
+from tenders_recommender.dto import Testset
 
 
 class AlgoTrainer(object):

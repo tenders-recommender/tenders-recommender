@@ -6,7 +6,7 @@ import re
 from typing import List, Dict
 from collections import ChainMap
 from tenders_recommender.dao import DescriptionsDao
-from tenders_recommender.model import Recommendation
+from tenders_recommender.dto import Recommendation
 
 YEAR_REGEX = re.compile(r'(?:\b|\D)(\d{4})(?:\b|\D)')
 ID_REGEX = re.compile(r'(\d+)')
