@@ -38,4 +38,4 @@ class Recommender(object):
             recommendations.append(Recommendation(self.__ids_offers_map[offer_id], mean(estimations), '-'))
 
         recommendations.sort(key=lambda recommendation: recommendation.estimation, reverse=True)
-        return recommendations[top_n]
+        return recommendations[:top_n]

@@ -33,7 +33,7 @@ class Parser(object):
         unique_offers = list(OrderedDict.fromkeys(map(lambda interaction: interaction[WHAT], all_interactions)))
         offers_ids_map: Dict[str, int] = {offer_name: (index + 1) for index, offer_name in enumerate(unique_offers)}
 
-        data_frame: DataFrame = Parser.__create_data_frame(offers_ids_map, all_interactions, score_map)
+        data_frame: DataFrame = Parser.__create_data_frame(offers_ids_map, all_interactions, score_map, rating_scale)
         whole_data_set, train_set, test_set = Parser.__create_data_sets(data_frame, rating_scale)
         ids_offers_map: Dict[int, str] = {value: key for key, value in offers_ids_map.items()}
 
@@ -42,13 +42,24 @@ class Parser(object):
     @staticmethod
     def __create_data_frame(offers_ids_map: Dict[str, int],
                             interactions: List[Interaction],
-                            score_map: Dict[str, float]) -> DataFrame:
+                            score_map: Dict[str, float],
+                            rating_scale: Tuple[float, float]) -> DataFrame:
         unique_user_offer_map: Dict[Tuple[int, int], float] = {}
 
         for interaction in interactions:
             user_id: int = interaction[WHO]
             offer_id: int = offers_ids_map[interaction[WHAT]]
-            score: float = score_map[interaction[TYPE]]
+
+            interaction_type = interaction[TYPE]
+            elastic_search_score = interaction.get(SCORE, None)
+            if elastic_search_score is None:
+                score = score_map[interaction_type]
+            else:
+                score = score_map[interaction_type] * elastic_search_score
+                if score < rating_scale[0]:
+                    score = rating_scale[0]
+                elif score > rating_scale[1]:
+                    score = rating_scale[1]
 
             map_key: Tuple[int, int] = (user_id, offer_id)
             if map_key not in unique_user_offer_map or unique_user_offer_map[map_key] < score:

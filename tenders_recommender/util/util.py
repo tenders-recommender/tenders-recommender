@@ -34,10 +34,13 @@ def add_descriptions_to_offers(recommendations: List[Recommendation]) -> List[Re
 
     descriptions_dao = DescriptionsDao()
     results = descriptions_dao.query_all_descriptions()
+
     descriptions_list: List = []
     for result in results:
         descriptions_list.append(result.data)
+
     descriptions = dict(ChainMap(*descriptions_list))
+    descriptions = {offer_name.replace('-N-', '-'): description for offer_name, description in descriptions.items()}
 
     for r in recommendations:
         desc = find_description(descriptions, r.offer)
@@ -57,9 +60,4 @@ def find_description(descriptions: Dict[str, str], offer: str) -> str:
     offer_id = offer_id_list[0] if len(offer_id_list) == 1 else offer_id_list[1]
 
     offer_key = offer_id + '-' + year
-    description = descriptions[offer_key]
-
-    if description is not None:
-        return description
-    else:
-        return '-'
+    return descriptions.get(offer_key, '-')
