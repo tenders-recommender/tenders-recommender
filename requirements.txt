@@ -45,7 +45,7 @@ pyOpenSSL==18.0.0
 pytest==4.0.1
 python-dateutil==2.7.5
 pytz==2018.7
-PyYAML==3.13
+PyYAML==5.4
 queuelib==1.5.0
 requests==2.20.1
 retrying==1.3.3
